@@ -15,25 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-using Org.Apache.REEF.Tang.Annotations;
+using System;
+using System.Collections.Generic;
 using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a simple metrics with counters only. More metrics will be added in future.")]
-    [DefaultImplementation(typeof(EvaluatorMetrics))]
-    public interface IEvaluatorMetrics
+    public interface IMetric<T> : IMetric
     {
-        /// <summary>
-        /// Returns metrics counters
-        /// </summary>
-        /// <returns>Returns ICounters.</returns>
-        ICounters GetMetricsCounters();
+        string Name { get; }
 
-        /// <summary>
-        /// Serialize the metrics data into a string
-        /// </summary>
-        /// <returns>Returns serialized string of metrics</returns>
-        string Serialize();
+        string Description { get; }
+
+        T Value { get; }
+
+        long Timestamp { get; }
     }
 }

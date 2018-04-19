@@ -22,8 +22,8 @@ using Org.Apache.REEF.Utilities.Attributes;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     [Unstable("0.16", "This is to build a collection of counters for evaluator metrics.")]
-    [DefaultImplementation(typeof(Counters))]
-    public interface ICounters
+    [DefaultImplementation(typeof(MetricsImpl))]
+    public interface IMetrics
     {
         /// <summary>
         /// Register a new counter with a specified name.
@@ -33,7 +33,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the counter to be registered.</param>
         /// <param name="description">Description of the counter to be registered.</param>
         /// <returns>Returns a boolean to indicate if the counter is added.</returns>
-        bool TryRegisterCounter(string name, string description);
+        bool TryRegisterMetric(string name, string description);
 
         /// <summary>
         /// Get counter value for a given counter name
@@ -41,25 +41,18 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the counter</param>
         /// <param name="counter">The counter object returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        bool TryGetValue(string name, out ICounter counter);
-
-        /// <summary>
-        /// Increase the counter with the given number
-        /// </summary>
-        /// <param name="name">Name of the counter</param>
-        /// <param name="number">number to increase</param>
-        void Increment(string name, int number);
+        bool TryGetValue(string name, out IMetric<object> metric);
 
         /// <summary>
         /// Returns all the counters
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ICounter> GetCounters();
+        IEnumerable<IMetric<object>> GetMetrics();
 
         /// <summary>
-        /// Serialize the  counter into a string
+        /// Serialize the metrics into strings
         /// </summary>
-        /// <returns>Returns serialized string of the counters.</returns>
+        /// <returns>Returns serialized string of the metrics.</returns>
         string Serialize();
     }
 }

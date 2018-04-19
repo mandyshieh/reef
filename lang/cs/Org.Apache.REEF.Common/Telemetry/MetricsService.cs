@@ -38,7 +38,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// Contains Counters received in the Metrics service
         /// </summary>
-        private readonly CountersData _countersData;
+        private readonly MetricsData _metricsData;
 
         /// <summary>
         /// A set of metrics sinks
@@ -59,11 +59,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         private MetricsService(
             [Parameter(typeof(MetricSinks))] ISet<IMetricsSink> metricsSinks,
             [Parameter(typeof(CounterSinkThreshold))] int counterSinkThreshold,
-            CountersData countersData)
+            MetricsData countersData)
         {
             _metricsSinks = metricsSinks;
             _counterSinkThreshold = counterSinkThreshold;
-            _countersData = countersData;
+            _metricsData = countersData;
         }
 
         /// <summary>
@@ -73,17 +73,17 @@ namespace Org.Apache.REEF.Common.Telemetry
         public void OnNext(IContextMessage contextMessage)
         {
             var msgReceived = ByteUtilities.ByteArraysToString(contextMessage.Message);
-            var counters = new EvaluatorMetrics(msgReceived).GetMetricsCounters();
+            var counters = new EvaluatorMetrics(msgReceived).GetMetrics();
 
             Logger.Log(Level.Info, "Received {0} counters with context message: {1}.",
-                counters.GetCounters().Count(), msgReceived);
+                counters.GetMetrics().Count(), msgReceived);
 
-            _countersData.Update(counters);
+            _metricsData.Update(counters);
 
-            if (_countersData.TriggerSink(_counterSinkThreshold))
+            if (_metricsData.TriggerSink(_counterSinkThreshold))
             {
-                Sink(_countersData.GetCounterData());
-                _countersData.Reset();
+                Sink(_metricsData.GetMetricData());
+                _metricsData.Reset();
             }
         }
 

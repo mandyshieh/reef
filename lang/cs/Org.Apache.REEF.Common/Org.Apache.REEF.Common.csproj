@@ -247,21 +247,23 @@ under the License.
     <Compile Include="Tasks\TaskConfiguration.cs" />
     <Compile Include="Tasks\TaskConfigurationOptions.cs" />
     <Compile Include="Tasks\TaskMessage.cs" />
-    <Compile Include="Telemetry\Counter.cs" />
-    <Compile Include="Telemetry\CounterData.cs" />
-    <Compile Include="Telemetry\CountersData.cs" />
-    <Compile Include="Telemetry\Counters.cs" />
+    <Compile Include="Telemetry\ExampleImpl\Counter.cs" />
+    <Compile Include="Telemetry\Interfaces\IDoubleGauge.cs" />
+    <Compile Include="Telemetry\MetricData.cs" />
+    <Compile Include="Telemetry\MetricsData.cs" />
+    <Compile Include="Telemetry\ExampleImpl\MetricsImpl.cs" />
     <Compile Include="Telemetry\CounterSinkThreshold.cs" />
     <Compile Include="Telemetry\DefaultMetricsSink.cs" />
-    <Compile Include="Telemetry\DriverMetrics.cs" />
+    <Compile Include="Telemetry\ExampleImpl\DriverMetrics.cs" />
     <Compile Include="Telemetry\DriverMetricsObserverConfigurationModule.cs" />
     <Compile Include="Telemetry\DriverMetricsObservers.cs" />
-    <Compile Include="Telemetry\EvaluatorMetrics.cs" />
-    <Compile Include="Telemetry\ICounter.cs" />
-    <Compile Include="Telemetry\ICounters.cs" />
-    <Compile Include="Telemetry\IDriverMetrics.cs" />
-    <Compile Include="Telemetry\IEvaluatorMetrics.cs" />
-    <Compile Include="Telemetry\IMetricsSink.cs" />
+    <Compile Include="Telemetry\ExampleImpl\EvaluatorMetrics.cs" />
+    <Compile Include="Telemetry\Interfaces\ICounter.cs" />
+    <Compile Include="Telemetry\Interfaces\IMetrics.cs" />
+    <Compile Include="Telemetry\Interfaces\IDriverMetrics.cs" />
+    <Compile Include="Telemetry\Interfaces\IEvaluatorMetrics.cs" />
+    <Compile Include="Telemetry\Interfaces\IMetric.cs" />
+    <Compile Include="Telemetry\Interfaces\IMetricsSink.cs" />
     <Compile Include="Telemetry\MessageSenderConfigurationModule.cs" />
     <Compile Include="Telemetry\MetricSinks.cs" />
     <Compile Include="Telemetry\MetricsMessageSender.cs" />
@@ -269,6 +271,7 @@ under the License.
   </ItemGroup>
   <ItemGroup>
     <None Include="Avro\README.md" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="Org.Apache.REEF.Common.nuspec" />
     <None Include="packages.config" />
     <None Include="Protobuf\Proto\client_runtime.proto" />

@@ -22,56 +22,68 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// <summary>
     /// This class wraps a Counter object and the increment value since last sink
     /// </summary>
-    internal sealed class CounterData
+    internal sealed class MetricData
     {
         /// <summary>
-        /// Counter object
+        /// Metric object
         /// </summary>
-        private ICounter _counter;
+        private IMetric<object> _metric;
 
-        /// <summary>
-        /// Counter increment value since last sink
-        /// </summary>
-        internal int IncrementSinceLastSink { get; private set; }
+        private IList<IMetric<object>> _records;
+
+        ///// <summary>
+        ///// Whether metric has been updated since last sink.
+        ///// </summary>
+        internal bool ChangedSinceLastSink;
 
         /// <summary>
         /// Constructor for CounterData
         /// </summary>
         /// <param name="counter"></param>
         /// <param name="initialValue"></param>
-        internal CounterData(ICounter counter, int initialValue)
+        internal MetricData(IMetric<object> metric)
         {
-            _counter = counter;
-            IncrementSinceLastSink = initialValue;
+            _metric = metric;
+            ChangedSinceLastSink = true;
+            _records = new List<IMetric<object>>();
         }
 
         /// <summary>
         /// clear the increment since last sink
         /// </summary>
-        internal void ResetSinceLastSink()
+        internal void ResetChangeSinceLastSink()
         {
-            IncrementSinceLastSink = 0;
+            ChangedSinceLastSink = false;
+            _records.Clear();
         }
 
-        internal void UpdateCounter(ICounter counter)
+        internal void UpdateMetric(IMetric<object> metric)
         {
-            IncrementSinceLastSink += counter.Value - _counter.Value;
+            ChangedSinceLastSink = true;
+            IMetric<object> tmp = _metric;
+            _records.Add(tmp);
 
             //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the counter:
             //// if evaluator contains the aggregated values, the value will override existing value
             //// if evaluator only keep delta, the value should be added at here. But the value in the evaluator should be reset after message is sent
             //// For the counters from multiple evaluators with the same counter name, the value should be aggregated here
             //// We also need to consider failure cases.  
-            _counter = counter;
+            _metric = metric;
         }
 
         /// <summary>
         /// Get count name and value as KeyValuePair
         /// </summary>
         /// <returns></returns>
-        internal KeyValuePair<string, string> GetKeyValuePair()
+        internal IEnumerable<KeyValuePair<string, string>> GetKeyValuePair()
         {
-            return new KeyValuePair<string, string>(_counter.Name, _counter.Value.ToString());
+            // return new KeyValuePair<string, string>(_metric.Name, _metric.Value.ToString());
+            var values = new List<KeyValuePair<string, string>>();
+            foreach(var r in _records)
+            {
+                values.Add(new KeyValuePair<string, string>(_metric.Name, r.Value.ToString()));
+            }
+            return values;
         }
     }
 }

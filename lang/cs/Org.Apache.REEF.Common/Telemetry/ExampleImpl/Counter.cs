@@ -76,49 +76,25 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Description of the counter.
         /// </summary>
         [DataMember]
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
+        public string Description => _description;
 
         /// <summary>
         /// Name of the counter.
         /// </summary>
         [DataMember]
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
+        public string Name => _name;
 
         /// <summary>
         /// Time that the counter is updated in the form of ticks.
         /// </summary>
         [DataMember]
-        public long Timestamp
-        {
-            get
-            {
-                return _timeStamp;
-            }
-        }
+        public long Timestamp => _timeStamp;
 
         /// <summary>
         /// Value of the counter.
         /// </summary>
         [DataMember]
-        public int Value
-        {
-            get
-            {
-                return _value;
-            }
-        }
+        public int Value => _value;
 
         /// <summary>
         /// Increase the counter value and update the time stamp.
@@ -129,5 +105,12 @@ namespace Org.Apache.REEF.Common.Telemetry
             _value += number;
             _timeStamp = DateTime.Now.Ticks;
         }
+
+        public void Increment()
+        {
+            _value++;
+            _timeStamp = DateTime.Now.Ticks;
+        }
+
     }
 }

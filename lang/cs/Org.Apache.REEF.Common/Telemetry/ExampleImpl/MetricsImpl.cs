@@ -25,22 +25,22 @@ using Org.Apache.REEF.Utilities.Logging;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     [Unstable("0.16", "This is to build a collection of counters for evaluator metrics.")]
-    internal sealed class Counters : ICounters
+    internal sealed class MetricsImpl : IMetrics
     {
-        private static readonly Logger Logger = Logger.GetLogger(typeof(Counters));
+        private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsImpl));
 
         /// <summary>
         /// It contains name and count pairs
         /// </summary>
-        private readonly IDictionary<string, ICounter> _counters = new Dictionary<string, ICounter>();
+        private readonly IDictionary<string, IMetric<object>> _metricsDict = new Dictionary<string, IMetric<object>>();
 
         /// <summary>
         /// The lock for counters
         /// </summary>
-        private readonly object _counterLock = new object();
+        private readonly object _metricLock = new object();
 
         [Inject]
-        private Counters()
+        private MetricsImpl()
         {
         }
 
@@ -48,18 +48,18 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Deserialize a counters serialized string into a Counters object
         /// </summary>
         /// <param name="serializedCountersString"></param>
-        internal Counters(string serializedCountersString)
+        internal MetricsImpl(string serializedCountersString)
         {
-            var c = JsonConvert.DeserializeObject<IEnumerable<Counter>>(serializedCountersString);
-            foreach (var ct in c)
+            var metrics = JsonConvert.DeserializeObject<IEnumerable<IMetric<int>>>(serializedCountersString);
+            foreach (var m in metrics)
             {
-                _counters.Add(ct.Name, ct);
+                _metricsDict.Add(m.Name, m);
             }
         }
 
-        public IEnumerable<ICounter> GetCounters()
+        public IEnumerable<IMetric<object>> GetMetrics()
         {
-            return _counters.Values;
+            return _metricsDict.Values;
         }
 
         /// <summary>
@@ -70,16 +70,16 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Counter name</param>
         /// <param name="description">Counter description</param>
         /// <returns>Returns a boolean to indicate if the counter is added.</returns>
-        public bool TryRegisterCounter(string name, string description)
+        public bool TryRegisterMetric(string name, string description)
         {
-            lock (_counterLock)
+            lock (_metricLock)
             {
-                if (_counters.ContainsKey(name))
+                if (_metricsDict.ContainsKey(name))
                 {
-                    Logger.Log(Level.Warning, "The counter [{0}] already exists.", name);
+                    Logger.Log(Level.Warning, "The metric [{0}] already exists.", name);
                     return false;
                 }
-                _counters.Add(name, new Counter(name, description));
+                _metricsDict.Add(name, new Counter(name, description));
             }
             return true;
         }
@@ -91,33 +91,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the counter</param>
         /// <param name="value">Value of the counter returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        public bool TryGetValue(string name, out ICounter value)
+        public bool TryGetValue(string name, out IMetric<object> value)
         {
-            lock (_counterLock)
+            lock (_metricLock)
             {
-                return _counters.TryGetValue(name, out value);
-            }
-        }
-
-        /// <summary>
-        /// Increase the counter with the given number
-        /// </summary>
-        /// <param name="name">Name of the counter</param>
-        /// <param name="number">number to increase</param>
-        public void Increment(string name, int number)
-        {
-            ICounter counter;
-            if (TryGetValue(name, out counter))
-            {
-                lock (_counterLock)
-                {
-                    counter.Increment(number);
-                }
-            }
-            else
-            {
-                Logger.Log(Level.Error, "The counter [{0}]  has not registered.", name);
-                throw new ApplicationException("Counter has not registered:" + name);
+                return _metricsDict.TryGetValue(name, out value);
             }
         }
 
@@ -129,14 +107,15 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <returns>Returns serialized string of the counters.</returns>
         public string Serialize()
         {
-            lock (_counterLock)
+            lock (_metricLock)
             {
-                if (_counters.Count > 0)
+                if (_metricsDict.Count > 0)
                 {
-                    return JsonConvert.SerializeObject(_counters.Values);
+                    return JsonConvert.SerializeObject(_metricsDict.Values);
                 }
                 return null;
             }
         }
+
     }
 }

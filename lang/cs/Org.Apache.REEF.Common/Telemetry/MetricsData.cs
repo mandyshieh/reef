@@ -29,51 +29,50 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// When new counter data is received, the data in the collection will be updated.
     /// After the data is processed, the increment since last process will be reset.
     /// </summary>
-    internal sealed class CountersData
+    internal sealed class MetricsData
     {
-        private static readonly Logger Logger = Logger.GetLogger(typeof(CountersData));
+        private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsData));
 
         /// <summary>
         /// Registration of counters
         /// </summary>
-        private readonly IDictionary<string, CounterData> _counterMap = new ConcurrentDictionary<string, CounterData>();
+        private readonly IDictionary<string, MetricData> _metricMap = new ConcurrentDictionary<string, MetricData>();
 
         [Inject]
-        private CountersData()
+        private MetricsData()
         {            
         }
 
         /// <summary>
         /// Update counters 
         /// </summary>
-        /// <param name="counters"></param>
-        internal void Update(ICounters counters)
+        /// <param name="metrics"></param>
+        internal void Update(IMetrics metrics)
         {
-            foreach (var counter in counters.GetCounters())
+            foreach (var metric in metrics.GetMetrics())
             {
-                CounterData counterData;
-                if (_counterMap.TryGetValue(counter.Name, out counterData))
+                if (_metricMap.TryGetValue(metric.Name, out MetricData metricData))
                 {
-                    counterData.UpdateCounter(counter);
+                    metricData.UpdateMetric(metric);
                 }
                 else
                 {
-                    _counterMap.Add(counter.Name, new CounterData(counter, counter.Value));
+                    _metricMap.Add(metric.Name, new MetricData(metric));
                 }
 
-                Logger.Log(Level.Verbose, "Counter name: {0}, value: {1}, description: {2}, time: {3},  incrementSinceLastSink: {4}.",
-                    counter.Name, counter.Value, counter.Description, new DateTime(counter.Timestamp), _counterMap[counter.Name].IncrementSinceLastSink);
+                Logger.Log(Level.Verbose, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
+                    metric.Name, metric.Value, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangedSinceLastSink);
             }
         }
 
         /// <summary>
-        /// Reset increment since last sink for each counter
+        /// Reset changed since last sink for each counter
         /// </summary>
         internal void Reset()
         {
-            foreach (var c in _counterMap.Values)
+            foreach (var c in _metricMap.Values)
             {
-                c.ResetSinceLastSink();
+                c.ResetChangeSinceLastSink();
             }
         }
 
@@ -81,18 +80,20 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Convert the counter data into ISet for sink
         /// </summary>
         /// <returns></returns>
-        internal IEnumerable<KeyValuePair<string, string>> GetCounterData()
+        internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
         {
-            return _counterMap.Select(counter => counter.Value.GetKeyValuePair());
+            return _metricMap.Select(counter => counter.Value.GetKeyValuePair()).SelectMany(record => record);
+            // return _counterMap.Select(counter => counter.Value.GetKeyValuePair());
         }
 
+        /// TODO
         /// <summary>
         /// The condition that triggers the sink. The condition can be modified later.
         /// </summary>
         /// <returns></returns>
         internal bool TriggerSink(int counterSinkThreshold)
         {
-            return _counterMap.Values.Sum(e => e.IncrementSinceLastSink) > counterSinkThreshold;
+            return _metricMap.Values.Select(e => e.ChangedSinceLastSink == true).Any();
         }
     }
 }
