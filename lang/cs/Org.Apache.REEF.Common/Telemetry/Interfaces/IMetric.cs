@@ -21,14 +21,19 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    public interface IMetric<T> : IMetric
+    public interface IMetric
     {
         string Name { get; }
 
         string Description { get; }
 
-        T Value { get; }
+        object ValueUntyped { get; }
 
         long Timestamp { get; }
+    }
+
+    public interface IMetric<T> : IMetric
+    {
+        T Value { get; }
     }
 }

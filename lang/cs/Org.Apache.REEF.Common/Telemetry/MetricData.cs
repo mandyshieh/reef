@@ -27,9 +27,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// Metric object
         /// </summary>
-        private IMetric<object> _metric;
+        private IMetric _metric;
 
-        private IList<IMetric<object>> _records;
+        private IList<IMetric> _records;
 
         ///// <summary>
         ///// Whether metric has been updated since last sink.
@@ -41,11 +41,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         /// <param name="counter"></param>
         /// <param name="initialValue"></param>
-        internal MetricData(IMetric<object> metric)
+        internal MetricData(IMetric metric)
         {
             _metric = metric;
             ChangedSinceLastSink = true;
-            _records = new List<IMetric<object>>();
+            _records = new List<IMetric>();
         }
 
         /// <summary>
@@ -57,10 +57,10 @@ namespace Org.Apache.REEF.Common.Telemetry
             _records.Clear();
         }
 
-        internal void UpdateMetric(IMetric<object> metric)
+        internal void UpdateMetric(IMetric metric)
         {
             ChangedSinceLastSink = true;
-            IMetric<object> tmp = _metric;
+            IMetric tmp = _metric;
             _records.Add(tmp);
 
             //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the counter:
@@ -79,9 +79,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             // return new KeyValuePair<string, string>(_metric.Name, _metric.Value.ToString());
             var values = new List<KeyValuePair<string, string>>();
-            foreach(var r in _records)
+            foreach (var r in _records)
             {
-                values.Add(new KeyValuePair<string, string>(_metric.Name, r.Value.ToString()));
+                values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
             }
             return values;
         }

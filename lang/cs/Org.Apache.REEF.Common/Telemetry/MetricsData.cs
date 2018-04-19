@@ -40,7 +40,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         [Inject]
         private MetricsData()
-        {            
+        {
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Org.Apache.REEF.Common.Telemetry
                 }
 
                 Logger.Log(Level.Verbose, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
-                    metric.Name, metric.Value, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangedSinceLastSink);
+                    metric.Name, metric.ValueUntyped, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangedSinceLastSink);
             }
         }
 
@@ -83,6 +83,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
         {
             return _metricMap.Select(counter => counter.Value.GetKeyValuePair()).SelectMany(record => record);
+            
             // return _counterMap.Select(counter => counter.Value.GetKeyValuePair());
         }
 

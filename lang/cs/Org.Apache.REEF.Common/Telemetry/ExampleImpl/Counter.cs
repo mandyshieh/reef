@@ -27,24 +27,9 @@ namespace Org.Apache.REEF.Common.Telemetry
     [DataContract]
     internal sealed class Counter : ICounter
     {
-        /// <summary>
-        /// Name of the counter.
-        /// </summary>
         private readonly string _name;
-
-        /// <summary>
-        /// Description of the counter.
-        /// </summary>
         private readonly string _description;
-
-        /// <summary>
-        /// Time that the counter is updated.
-        /// </summary>
-        private long _timeStamp;
-
-        /// <summary>
-        /// Value of the counter.
-        /// </summary>
+        private long _timestamp;
         private int _value;
 
         /// <summary>
@@ -56,7 +41,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             _name = name;
             _description = description;
-            _timeStamp = DateTime.Now.Ticks;
+            _timestamp = DateTime.Now.Ticks;
             _value = 0;
         }
 
@@ -68,33 +53,64 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             _name = name;
             _description = description;
-            _timeStamp = timeStamp;
+            _timestamp = timeStamp;
             _value = value;
+        }
+
+        /// <summary>
+        /// Name of the counter.
+        /// </summary>
+        [DataMember]
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
         }
 
         /// <summary>
         /// Description of the counter.
         /// </summary>
         [DataMember]
-        public string Description => _description;
-
-        /// <summary>
-        /// Name of the counter.
-        /// </summary>
-        [DataMember]
-        public string Name => _name;
+        public string Description
+        {
+            get
+            {
+                return _description;
+            }
+        }
 
         /// <summary>
         /// Time that the counter is updated in the form of ticks.
         /// </summary>
-        [DataMember]
-        public long Timestamp => _timeStamp;
+        public long Timestamp
+        {
+            get
+            {
+                return _timestamp;
+            }
+        }
 
         /// <summary>
         /// Value of the counter.
         /// </summary>
         [DataMember]
-        public int Value => _value;
+        public int Value
+        {
+            get
+            {
+                return _value;
+            }
+        }
+
+        public object ValueUntyped
+        {
+            get
+            {
+                return _value;
+            }
+        }
 
         /// <summary>
         /// Increase the counter value and update the time stamp.
@@ -103,14 +119,13 @@ namespace Org.Apache.REEF.Common.Telemetry
         public void Increment(int number)
         {
             _value += number;
-            _timeStamp = DateTime.Now.Ticks;
+            _timestamp = DateTime.Now.Ticks;
         }
 
         public void Increment()
         {
             _value++;
-            _timeStamp = DateTime.Now.Ticks;
+            _timestamp = DateTime.Now.Ticks;
         }
-
     }
 }

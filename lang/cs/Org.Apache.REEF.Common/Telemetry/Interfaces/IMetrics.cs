@@ -41,13 +41,13 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the counter</param>
         /// <param name="counter">The counter object returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        bool TryGetValue(string name, out IMetric<object> metric);
+        bool TryGetValue(string name, out IMetric metric);
 
         /// <summary>
         /// Returns all the counters
         /// </summary>
         /// <returns></returns>
-        IEnumerable<IMetric<object>> GetMetrics();
+        IEnumerable<IMetric> GetMetrics();
 
         /// <summary>
         /// Serialize the metrics into strings
