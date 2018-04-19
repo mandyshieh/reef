@@ -21,7 +21,7 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    public interface IMetric
+    public interface IMetricBase
     {
         string Name { get; }
 
@@ -32,7 +32,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         long Timestamp { get; }
     }
 
-    public interface IMetric<T> : IMetric
+    public interface IMetric<T> : IMetricBase
     {
         T Value { get; }
     }

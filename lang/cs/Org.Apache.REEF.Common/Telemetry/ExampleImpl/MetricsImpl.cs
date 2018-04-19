@@ -32,7 +32,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// It contains name and count pairs
         /// </summary>
-        private readonly IDictionary<string, IMetric> _metricsDict = new Dictionary<string, IMetric>();
+        private readonly IDictionary<string, IMetricBase> _metricsDict = new Dictionary<string, IMetricBase>();
 
         /// <summary>
         /// The lock for counters
@@ -57,7 +57,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
-        public IEnumerable<IMetric> GetMetrics()
+        public IEnumerable<IMetricBase> GetMetrics()
         {
             return _metricsDict.Values;
         }
@@ -91,7 +91,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the counter</param>
         /// <param name="value">Value of the counter returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        public bool TryGetValue(string name, out IMetric value)
+        public bool TryGetValue(string name, out IMetricBase value)
         {
             lock (_metricLock)
             {

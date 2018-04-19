@@ -27,9 +27,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// Metric object
         /// </summary>
-        private IMetric _metric;
+        private IMetricBase _metric;
 
-        private IList<IMetric> _records;
+        private IList<IMetricBase> _records;
 
         ///// <summary>
         ///// Whether metric has been updated since last sink.
@@ -41,11 +41,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         /// <param name="counter"></param>
         /// <param name="initialValue"></param>
-        internal MetricData(IMetric metric)
+        internal MetricData(IMetricBase metric)
         {
             _metric = metric;
             ChangedSinceLastSink = true;
-            _records = new List<IMetric>();
+            _records = new List<IMetricBase>();
         }
 
         /// <summary>
@@ -57,10 +57,10 @@ namespace Org.Apache.REEF.Common.Telemetry
             _records.Clear();
         }
 
-        internal void UpdateMetric(IMetric metric)
+        internal void UpdateMetric(IMetricBase metric)
         {
             ChangedSinceLastSink = true;
-            IMetric tmp = _metric;
+            IMetricBase tmp = _metric;
             _records.Add(tmp);
 
             //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the counter:
