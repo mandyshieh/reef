@@ -248,11 +248,10 @@ under the License.
     <Compile Include="Tasks\TaskConfigurationOptions.cs" />
     <Compile Include="Tasks\TaskMessage.cs" />
     <Compile Include="Telemetry\ExampleImpl\Counter.cs" />
-    <Compile Include="Telemetry\Interfaces\IDoubleGauge.cs" />
     <Compile Include="Telemetry\MetricData.cs" />
     <Compile Include="Telemetry\MetricsData.cs" />
     <Compile Include="Telemetry\ExampleImpl\MetricsImpl.cs" />
-    <Compile Include="Telemetry\CounterSinkThreshold.cs" />
+    <Compile Include="Telemetry\MetricSinkThreshold.cs" />
     <Compile Include="Telemetry\DefaultMetricsSink.cs" />
     <Compile Include="Telemetry\ExampleImpl\DriverMetrics.cs" />
     <Compile Include="Telemetry\DriverMetricsObserverConfigurationModule.cs" />
@@ -271,7 +270,6 @@ under the License.
   </ItemGroup>
   <ItemGroup>
     <None Include="Avro\README.md" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="Org.Apache.REEF.Common.nuspec" />
     <None Include="packages.config" />
     <None Include="Protobuf\Proto\client_runtime.proto" />

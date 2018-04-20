@@ -20,14 +20,14 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a simple metrics with counters only. More metrics will be added in future.")]
+    [Unstable("0.16", "This is to build a simple metrics with metrics only. More metrics will be added in future.")]
     [DefaultImplementation(typeof(EvaluatorMetrics))]
     public interface IEvaluatorMetrics
     {
         /// <summary>
-        /// Returns metrics counters
+        /// Returns metrics
         /// </summary>
-        /// <returns>Returns ICounters.</returns>
+        /// <returns>Returns IMetrics.</returns>
         IMetrics GetMetrics();
 
         /// <summary>

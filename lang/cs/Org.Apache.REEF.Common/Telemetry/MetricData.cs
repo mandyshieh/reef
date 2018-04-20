@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// This class wraps a Counter object and the increment value since last sink
+    /// This class wraps a metric object and the increment value since last sink
     /// </summary>
     internal sealed class MetricData
     {
@@ -34,17 +34,17 @@ namespace Org.Apache.REEF.Common.Telemetry
         ///// <summary>
         ///// Whether metric has been updated since last sink.
         ///// </summary>
-        internal bool ChangedSinceLastSink;
+        internal int ChangesSinceLastSink;
 
         /// <summary>
-        /// Constructor for CounterData
+        /// Constructor for metricData
         /// </summary>
-        /// <param name="counter"></param>
+        /// <param name="metric"></param>
         /// <param name="initialValue"></param>
         internal MetricData(IMetricBase metric)
         {
             _metric = metric;
-            ChangedSinceLastSink = true;
+            ChangesSinceLastSink = 0;
             _records = new List<IMetricBase>();
         }
 
@@ -53,20 +53,20 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         internal void ResetChangeSinceLastSink()
         {
-            ChangedSinceLastSink = false;
+            ChangesSinceLastSink = 0;
             _records.Clear();
         }
 
         internal void UpdateMetric(IMetricBase metric)
         {
-            ChangedSinceLastSink = true;
+            ChangesSinceLastSink++;
             IMetricBase tmp = _metric;
             _records.Add(tmp);
 
-            //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the counter:
+            //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the metric:
             //// if evaluator contains the aggregated values, the value will override existing value
             //// if evaluator only keep delta, the value should be added at here. But the value in the evaluator should be reset after message is sent
-            //// For the counters from multiple evaluators with the same counter name, the value should be aggregated here
+            //// For the metrics from multiple evaluators with the same metric name, the value should be aggregated here
             //// We also need to consider failure cases.  
             _metric = metric;
         }

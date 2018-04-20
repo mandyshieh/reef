@@ -25,8 +25,8 @@ using Org.Apache.REEF.Utilities.Logging;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// This class maintains a collection of the data for all the counters for metrics service. 
-    /// When new counter data is received, the data in the collection will be updated.
+    /// This class maintains a collection of the data for all the metrics for metrics service. 
+    /// When new metric data is received, the data in the collection will be updated.
     /// After the data is processed, the increment since last process will be reset.
     /// </summary>
     internal sealed class MetricsData
@@ -34,7 +34,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsData));
 
         /// <summary>
-        /// Registration of counters
+        /// Registration of metrics
         /// </summary>
         private readonly IDictionary<string, MetricData> _metricMap = new ConcurrentDictionary<string, MetricData>();
 
@@ -44,7 +44,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Update counters 
+        /// Update metrics 
         /// </summary>
         /// <param name="metrics"></param>
         internal void Update(IMetrics metrics)
@@ -61,12 +61,12 @@ namespace Org.Apache.REEF.Common.Telemetry
                 }
 
                 Logger.Log(Level.Verbose, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
-                    metric.Name, metric.ValueUntyped, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangedSinceLastSink);
+                    metric.Name, metric.ValueUntyped, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangesSinceLastSink);
             }
         }
 
         /// <summary>
-        /// Reset changed since last sink for each counter
+        /// Reset changed since last sink for each metric
         /// </summary>
         internal void Reset()
         {
@@ -77,14 +77,12 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Convert the counter data into ISet for sink
+        /// Convert the metric data into ISet for sink
         /// </summary>
         /// <returns></returns>
         internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
         {
-            return _metricMap.Select(counter => counter.Value.GetKeyValuePair()).SelectMany(record => record);
-            
-            // return _counterMap.Select(counter => counter.Value.GetKeyValuePair());
+            return _metricMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
         }
 
         /// TODO
@@ -92,9 +90,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// The condition that triggers the sink. The condition can be modified later.
         /// </summary>
         /// <returns></returns>
-        internal bool TriggerSink(int counterSinkThreshold)
+        internal bool TriggerSink(int metricSinkThreshold)
         {
-            return _metricMap.Values.Select(e => e.ChangedSinceLastSink == true).Any();
+            return _metricMap.Values.Sum(e => e.ChangesSinceLastSink) > metricSinkThreshold;
         }
     }
 }

@@ -20,7 +20,7 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a simple metrics with counters only. More metrics will be added in future.")]
+    [Unstable("0.16", "This is to build a simple metrics with metrics only. More metrics will be added in future.")]
     internal sealed class EvaluatorMetrics : IEvaluatorMetrics
     {
         private readonly MetricsImpl _metrics;
@@ -41,18 +41,18 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Returns counters
+        /// Returns metrics
         /// </summary>
-        /// <returns>Returns counters.</returns>
+        /// <returns>Returns metrics.</returns>
         public IMetrics GetMetrics()
         {
             return _metrics;
         }
 
         /// <summary>
-        /// return serialized string of metrics counters data
+        /// return serialized string of metrics metrics data
         /// </summary>
-        /// <returns>Returns serialized string of counters.</returns>
+        /// <returns>Returns serialized string of metrics.</returns>
         public string Serialize()
         {
             if (_metrics != null)

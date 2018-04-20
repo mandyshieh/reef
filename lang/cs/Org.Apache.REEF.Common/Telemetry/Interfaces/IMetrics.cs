@@ -21,30 +21,30 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a collection of counters for evaluator metrics.")]
+    [Unstable("0.16", "This is to build a collection of metrics for evaluator metrics.")]
     [DefaultImplementation(typeof(MetricsImpl))]
     public interface IMetrics
     {
         /// <summary>
-        /// Register a new counter with a specified name.
-        /// If name does not exist, the counter will be added and true will be returned
-        /// Otherwise the counter will be not added and false will be returned. 
+        /// Register a new metric with a specified name.
+        /// If name does not exist, the metric will be added and true will be returned
+        /// Otherwise the metric will be not added and false will be returned. 
         /// </summary>
-        /// <param name="name">Name of the counter to be registered.</param>
-        /// <param name="description">Description of the counter to be registered.</param>
-        /// <returns>Returns a boolean to indicate if the counter is added.</returns>
-        bool TryRegisterMetric(string name, string description);
+        /// <param name="name">Name of the metric to be registered.</param>
+        /// <param name="description">Description of the metric to be registered.</param>
+        /// <returns>Returns a boolean to indicate if the metric is added.</returns>
+        bool TryRegisterMetric(IMetricBase metric);
 
         /// <summary>
-        /// Get counter value for a given counter name
+        /// Get metric value for a given metric name
         /// </summary>
-        /// <param name="name">Name of the counter</param>
-        /// <param name="counter">The counter object returned</param>
+        /// <param name="name">Name of the metric</param>
+        /// <param name="metric">The metric object returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
         bool TryGetValue(string name, out IMetricBase metric);
 
         /// <summary>
-        /// Returns all the counters
+        /// Returns all the metrics
         /// </summary>
         /// <returns></returns>
         IEnumerable<IMetricBase> GetMetrics();

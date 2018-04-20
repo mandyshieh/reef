@@ -40,7 +40,7 @@ namespace Org.Apache.REEF.Driver
                 GenericType<DriverBridgeConfigurationOptions.ContextMessageHandlers>.Class,
                 GenericType<MetricsService>.Class)
             .BindSetEntry(GenericType<MetricSinks>.Class, OnMetricsSink)
-            .BindNamedParameter(GenericType<CounterSinkThreshold>.Class, CounterSinkThreshold)
+            .BindNamedParameter(GenericType<MetricSinkThreshold>.Class, CounterSinkThreshold)
             .Build();
     }
 }

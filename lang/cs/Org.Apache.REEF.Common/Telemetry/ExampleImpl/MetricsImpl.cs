@@ -24,7 +24,7 @@ using Org.Apache.REEF.Utilities.Logging;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a collection of counters for evaluator metrics.")]
+    [Unstable("0.16", "This is to build a collection of metrics for evaluator metrics.")]
     internal sealed class MetricsImpl : IMetrics
     {
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsImpl));
@@ -35,7 +35,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         private readonly IDictionary<string, IMetricBase> _metricsDict = new Dictionary<string, IMetricBase>();
 
         /// <summary>
-        /// The lock for counters
+        /// The lock for metrics
         /// </summary>
         private readonly object _metricLock = new object();
 
@@ -45,12 +45,12 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Deserialize a counters serialized string into a Counters object
+        /// Deserialize a metrics serialized string into a metrics object
         /// </summary>
-        /// <param name="serializedCountersString"></param>
-        internal MetricsImpl(string serializedCountersString)
+        /// <param name="serializedMetricsString"></param>
+        internal MetricsImpl(string serializedMetricsString)
         {
-            var metrics = JsonConvert.DeserializeObject<IEnumerable<IMetric<int>>>(serializedCountersString);
+            var metrics = JsonConvert.DeserializeObject<IEnumerable<IMetricBase>>(serializedMetricsString);
             foreach (var m in metrics)
             {
                 _metricsDict.Add(m.Name, m);
@@ -63,48 +63,48 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Register a new counter with a specified name.
-        /// If name does not exist, the counter will be added and true will be returned
-        /// Otherwise the counter will be not added and false will be returned. 
+        /// Register a new metric with a specified name.
+        /// If name does not exist, the metric will be added and true will be returned
+        /// Otherwise the metric will be not added and false will be returned. 
         /// </summary>
-        /// <param name="name">Counter name</param>
-        /// <param name="description">Counter description</param>
-        /// <returns>Returns a boolean to indicate if the counter is added.</returns>
-        public bool TryRegisterMetric(string name, string description)
+        /// <param name="name">Metric name</param>
+        /// <param name="description">Metric description</param>
+        /// <returns>Returns a boolean to indicate if the metric is added.</returns>
+        public bool TryRegisterMetric(IMetricBase metric)
         {
             lock (_metricLock)
             {
-                if (_metricsDict.ContainsKey(name))
+                if (_metricsDict.ContainsKey(metric.Name))
                 {
-                    Logger.Log(Level.Warning, "The metric [{0}] already exists.", name);
+                    Logger.Log(Level.Warning, "The metric [{0}] already exists.", metric.Name);
                     return false;
                 }
-                _metricsDict.Add(name, new Counter(name, description));
+                _metricsDict.Add(metric.Name, metric);
             }
             return true;
         }
 
         /// <summary>
-        /// Get counter for a given name
-        /// return false if the counter doesn't exist
+        /// Get metric for a given name
+        /// return false if the metric isn't registered.
         /// </summary>
-        /// <param name="name">Name of the counter</param>
-        /// <param name="value">Value of the counter returned</param>
+        /// <param name="name">Name of the metric</param>
+        /// <param name="registeredMetric">Value of the metric returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        public bool TryGetValue(string name, out IMetricBase value)
+        public bool TryGetValue(string name, out IMetricBase registeredMetric)
         {
             lock (_metricLock)
             {
-                return _metricsDict.TryGetValue(name, out value);
+                return _metricsDict.TryGetValue(name, out registeredMetric);
             }
         }
 
         /// <summary>
-        /// return serialized string of counter data
-        /// TODO: [REEF-] use an unique number for the counter name mapping to reduce the data transfer over the wire
+        /// return serialized string of metric data
+        /// TODO: [REEF-] use an unique number for the metric name mapping to reduce the data transfer over the wire
         /// TODO: [REEF-] use Avro schema if that can make the serialized string more compact
         /// </summary>
-        /// <returns>Returns serialized string of the counters.</returns>
+        /// <returns>Returns serialized string of the metrics.</returns>
         public string Serialize()
         {
             lock (_metricLock)
