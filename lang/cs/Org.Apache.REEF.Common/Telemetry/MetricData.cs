@@ -81,7 +81,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             var values = new List<KeyValuePair<string, string>>();
             foreach (var r in _records)
             {
-                values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
+                values.Add(new KeyValuePair<string, string>(_metric.Name, r.Value.ToString()));
             }
             return values;
         }

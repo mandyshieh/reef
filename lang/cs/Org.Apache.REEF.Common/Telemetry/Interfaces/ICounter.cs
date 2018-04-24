@@ -16,7 +16,7 @@ using Org.Apache.REEF.Utilities.Attributes;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     [Unstable("0.16", "This is a simple counter for evaluator metrics.")]
-    public interface ICounter : IMetric<int>
+    public interface ICounter
     { 
         /// <summary>
         /// Increases the current counter value by 1.

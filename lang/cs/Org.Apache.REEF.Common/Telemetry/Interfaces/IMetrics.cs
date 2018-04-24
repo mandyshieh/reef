@@ -33,7 +33,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the metric to be registered.</param>
         /// <param name="description">Description of the metric to be registered.</param>
         /// <returns>Returns a boolean to indicate if the metric is added.</returns>
-        bool TryRegisterMetric(IMetricBase metric);
+        bool TryRegisterMetric(MetricBase metric);
 
         /// <summary>
         /// Get metric value for a given metric name
@@ -41,7 +41,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the metric</param>
         /// <param name="metric">The metric object returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        bool TryGetValue(string name, out IMetricBase metric);
+        bool TryGetValue(string name, out MetricBase metric);
 
         /// <summary>
         /// Returns all the metrics
@@ -54,5 +54,8 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         /// <returns>Returns serialized string of the metrics.</returns>
         string Serialize();
+
+        // Legacy method from when metrics consisted only of counters
+        void IncrementCounter(string name, int num);
     }
 }

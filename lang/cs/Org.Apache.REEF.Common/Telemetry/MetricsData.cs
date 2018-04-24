@@ -61,7 +61,7 @@ namespace Org.Apache.REEF.Common.Telemetry
                 }
 
                 Logger.Log(Level.Verbose, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
-                    metric.Name, metric.ValueUntyped, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangesSinceLastSink);
+                    metric.Name, metric.Value, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangesSinceLastSink);
             }
         }
 

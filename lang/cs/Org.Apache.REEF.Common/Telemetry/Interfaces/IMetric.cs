@@ -16,7 +16,8 @@
 // under the License.
 
 using System;
-using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
@@ -27,13 +28,85 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         string Description { get; }
 
-        object ValueUntyped { get; }
+        object Value { get; }
 
         long Timestamp { get; }
+
+        MetricType Type { get; }
     }
 
-    public interface IMetric<T> : IMetricBase
+    public class MetricBase : IMetricBase
     {
-        T Value { get; }
+        protected string _name;
+        protected string _description;
+        protected long _timestamp;
+        protected object _value;
+        protected MetricType _type = MetricType.NA;
+
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                return _description;
+            }
+        }
+
+        public long Timestamp
+        {
+            get
+            {
+                return _timestamp;
+            }
+        }
+
+        public virtual object Value
+        {
+            get
+            {
+                return _value;
+            }
+        }
+
+        public MetricType Type
+        {
+            get
+            {
+                return _type;
+            }
+        }
+
+        public MetricBase(string name, string description)
+        {
+            _name = name;
+            _description = description;
+            _timestamp = DateTime.Now.Ticks;
+        }
+
+        [JsonConstructor]
+        public MetricBase(string name, string description, object value, long timeStamp, MetricType type)
+        {
+            _name = name;
+            _description = description;
+            _value = value;
+            _timestamp = timeStamp;
+            _type = type;
+        }
+    }
+
+    public enum MetricType
+    {
+        Counter,
+        Integer,
+        Double,
+        Long,
+        NA
     }
 }

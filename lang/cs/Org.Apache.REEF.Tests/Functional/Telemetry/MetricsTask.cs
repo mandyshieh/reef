@@ -47,8 +47,8 @@ namespace Org.Apache.REEF.Tests.Functional.Telemetry
         {
             for (int i = 0; i < 100; i++)
             {
-                _counters.Increment(TestCounter1, 1);
-                _counters.Increment(TestCounter2, 2);
+                _metrics.IncrementCounter(TestCounter1, 1);
+                _metrics.IncrementCounter(TestCounter2, 2);
                 Thread.Sleep(100);
             }
             return null;

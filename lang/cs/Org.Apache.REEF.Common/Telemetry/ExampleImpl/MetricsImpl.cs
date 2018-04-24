@@ -29,10 +29,15 @@ namespace Org.Apache.REEF.Common.Telemetry
     {
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsImpl));
 
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
+        
         /// <summary>
         /// It contains name and count pairs
         /// </summary>
-        private readonly IDictionary<string, IMetricBase> _metricsDict = new Dictionary<string, IMetricBase>();
+        private readonly IDictionary<string, MetricBase> _metricsDict = new Dictionary<string, MetricBase>();
 
         /// <summary>
         /// The lock for metrics
@@ -50,7 +55,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="serializedMetricsString"></param>
         internal MetricsImpl(string serializedMetricsString)
         {
-            var metrics = JsonConvert.DeserializeObject<IEnumerable<IMetricBase>>(serializedMetricsString);
+            var metrics = JsonConvert.DeserializeObject<IEnumerable<MetricBase>>(serializedMetricsString);
             foreach (var m in metrics)
             {
                 _metricsDict.Add(m.Name, m);
@@ -70,7 +75,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Metric name</param>
         /// <param name="description">Metric description</param>
         /// <returns>Returns a boolean to indicate if the metric is added.</returns>
-        public bool TryRegisterMetric(IMetricBase metric)
+        public bool TryRegisterMetric(MetricBase metric)
         {
             lock (_metricLock)
             {
@@ -91,7 +96,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="name">Name of the metric</param>
         /// <param name="registeredMetric">Value of the metric returned</param>
         /// <returns>Returns a boolean to indicate if the value is found.</returns>
-        public bool TryGetValue(string name, out IMetricBase registeredMetric)
+        public bool TryGetValue(string name, out MetricBase registeredMetric)
         {
             lock (_metricLock)
             {
@@ -114,6 +119,20 @@ namespace Org.Apache.REEF.Common.Telemetry
                     return JsonConvert.SerializeObject(_metricsDict.Values);
                 }
                 return null;
+            }
+        }
+
+        public void IncrementCounter(string name, int num)
+        {
+            if (TryGetValue(name, out MetricBase metric) && metric.Type == MetricType.Counter)
+            {
+                var counter = (Counter)metric;
+                counter.Increment(num);
+            }
+            else
+            {
+                Logger.Log(Level.Error, "The counter [{0}] has not been registered", name);
+                throw new ApplicationException("Counter has not been registered: " + name);
             }
         }
     }

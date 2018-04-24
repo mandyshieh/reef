@@ -24,92 +24,37 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// For example, the name can be mapped to a unique number (byte) and description should not be serialized.
     /// </summary>
     [Unstable("0.16", "This is a simple counter for evaluator metrics.")]
-    [DataContract]
-    internal sealed class Counter : ICounter
+    internal sealed class Counter : MetricBase, ICounter
     {
-        private readonly string _name;
-        private readonly string _description;
-        private long _timestamp;
-        private int _value;
+        private int _typedValue;
+
+        public override object Value
+        {
+            get
+            {
+                return _typedValue;
+            }
+        }
 
         /// <summary>
         /// Constructor to create a new counter.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="description"></param>
-        internal Counter(string name, string description)
+        internal Counter(string name, string description) :
+            base(name, description)
         {
-            _name = name;
-            _description = description;
-            _timestamp = DateTime.Now.Ticks;
-            _value = 0;
+            _type = MetricType.Counter;
         }
 
         /// <summary>
         /// Constructor to create a counter from a serialized counter string
         /// </summary>
         [JsonConstructor]
-        internal Counter(string name, string description, long timeStamp, int value)
+        internal Counter(string name, string description, long timeStamp, int value) :
+            base(name, description, value, timeStamp, MetricType.Counter)
         {
-            _name = name;
-            _description = description;
-            _timestamp = timeStamp;
-            _value = value;
-        }
-
-        /// <summary>
-        /// Name of the counter.
-        /// </summary>
-        [DataMember]
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
-
-        /// <summary>
-        /// Description of the counter.
-        /// </summary>
-        [DataMember]
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
-
-        /// <summary>
-        /// Time that the counter is updated in the form of ticks.
-        /// </summary>
-        public long Timestamp
-        {
-            get
-            {
-                return _timestamp;
-            }
-        }
-
-        /// <summary>
-        /// Value of the counter.
-        /// </summary>
-        [DataMember]
-        public int Value
-        {
-            get
-            {
-                return _value;
-            }
-        }
-
-        public object ValueUntyped
-        {
-            get
-            {
-                return _value;
-            }
+            _typedValue = value;
         }
 
         /// <summary>
@@ -118,13 +63,13 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="number"></param>
         public void Increment(int number)
         {
-            _value += number;
+            _typedValue += number;
             _timestamp = DateTime.Now.Ticks;
         }
 
         public void Increment()
         {
-            _value++;
+            _typedValue++;
             _timestamp = DateTime.Now.Ticks;
         }
     }
