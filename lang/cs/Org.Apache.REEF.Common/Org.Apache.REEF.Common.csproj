@@ -262,7 +262,7 @@ under the License.
     <Compile Include="Telemetry\Interfaces\IMetrics.cs" />
     <Compile Include="Telemetry\Interfaces\IDriverMetrics.cs" />
     <Compile Include="Telemetry\Interfaces\IEvaluatorMetrics.cs" />
-    <Compile Include="Telemetry\Interfaces\IMetric.cs" />
+    <Compile Include="Telemetry\MetricBase.cs" />
     <Compile Include="Telemetry\Interfaces\IMetricsSink.cs" />
     <Compile Include="Telemetry\MessageSenderConfigurationModule.cs" />
     <Compile Include="Telemetry\MetricSinks.cs" />
