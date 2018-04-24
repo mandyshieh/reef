@@ -22,20 +22,7 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    public interface IMetricBase
-    {
-        string Name { get; }
-
-        string Description { get; }
-
-        object Value { get; }
-
-        long Timestamp { get; }
-
-        MetricType Type { get; }
-    }
-
-    public class MetricBase : IMetricBase
+    public class MetricBase
     {
         protected string _name;
         protected string _description;
@@ -73,6 +60,11 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 return _value;
             }
+            set
+            {
+                _value = value;
+                _timestamp = DateTime.Now.Ticks;
+            }
         }
 
         public MetricType Type
@@ -98,6 +90,19 @@ namespace Org.Apache.REEF.Common.Telemetry
             _value = value;
             _timestamp = timeStamp;
             _type = type;
+
+            switch (type)
+            {
+                case MetricType.Counter:
+                case MetricType.Integer: _value = Convert.ToInt32(_value);
+                    break;
+                case MetricType.Double: _value = Convert.ToDouble(_value);
+                    break;
+                case MetricType.Long: _value = Convert.ToInt64(_value);
+                    break;
+                default: _value = value;
+                    break;
+            }
         }
     }
 

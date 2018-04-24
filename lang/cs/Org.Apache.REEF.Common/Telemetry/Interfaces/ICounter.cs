@@ -19,11 +19,6 @@ namespace Org.Apache.REEF.Common.Telemetry
     public interface ICounter
     { 
         /// <summary>
-        /// Increases the current counter value by 1.
-        /// </summary>
-        void Increment();
-
-        /// <summary>
         /// Increase the current counter value with the number specified.
         /// </summary>
         void Increment(int number);

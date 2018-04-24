@@ -66,11 +66,5 @@ namespace Org.Apache.REEF.Common.Telemetry
             _typedValue += number;
             _timestamp = DateTime.Now.Ticks;
         }
-
-        public void Increment()
-        {
-            _typedValue++;
-            _timestamp = DateTime.Now.Ticks;
-        }
     }
 }

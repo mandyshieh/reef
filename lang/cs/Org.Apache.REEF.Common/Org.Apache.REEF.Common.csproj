@@ -248,6 +248,7 @@ under the License.
     <Compile Include="Tasks\TaskConfigurationOptions.cs" />
     <Compile Include="Tasks\TaskMessage.cs" />
     <Compile Include="Telemetry\ExampleImpl\Counter.cs" />
+    <Compile Include="Telemetry\ExampleImpl\DoubleGauge.cs" />
     <Compile Include="Telemetry\MetricData.cs" />
     <Compile Include="Telemetry\MetricsData.cs" />
     <Compile Include="Telemetry\ExampleImpl\MetricsImpl.cs" />

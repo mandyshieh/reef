@@ -33,7 +33,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             TypeNameHandling = TypeNameHandling.All
         };
-        
+
         /// <summary>
         /// It contains name and count pairs
         /// </summary>
@@ -62,7 +62,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
-        public IEnumerable<IMetricBase> GetMetrics()
+        public IEnumerable<MetricBase> GetMetrics()
         {
             return _metricsDict.Values;
         }
@@ -133,6 +133,23 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 Logger.Log(Level.Error, "The counter [{0}] has not been registered", name);
                 throw new ApplicationException("Counter has not been registered: " + name);
+            }
+        }
+
+        /// <summary>
+        /// Example method of how to update metric value.
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetDoubleToPi(string name)
+        {
+            if (TryGetValue(name, out MetricBase metric) && metric.Type == MetricType.Double)
+            {
+                metric.Value = Math.PI;
+            }
+            else
+            {
+                Logger.Log(Level.Error, "The metric of type double [{0}] has not been registered", name);
+                throw new ApplicationException("Metric has not been registered: " + name);
             }
         }
     }
