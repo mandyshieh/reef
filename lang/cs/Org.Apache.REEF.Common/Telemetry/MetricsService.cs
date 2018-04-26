@@ -36,9 +36,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsService));
 
         /// <summary>
-        /// Contains Counters received in the Metrics service
+        /// Contains metrics received in the Metrics service
         /// </summary>
-        private readonly CountersData _countersData;
+        private readonly MetricsData _metricsData;
 
         /// <summary>
         /// A set of metrics sinks
@@ -47,10 +47,10 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         /// <summary>
         /// The threshold that triggers the sinks. 
-        /// Currently only one threshold is defined for all the counters.
-        /// Later, it can be extended to define a threshold per counter.
+        /// Currently only one threshold is defined for all the metrics.
+        /// Later, it can be extended to define a threshold per metric.
         /// </summary>
-        private readonly int _counterSinkThreshold;
+        private readonly int _metricSinkThreshold;
 
         /// <summary>
         /// It can be bound with driver configuration as a context message handler
@@ -58,12 +58,12 @@ namespace Org.Apache.REEF.Common.Telemetry
         [Inject]
         private MetricsService(
             [Parameter(typeof(MetricSinks))] ISet<IMetricsSink> metricsSinks,
-            [Parameter(typeof(CounterSinkThreshold))] int counterSinkThreshold,
-            CountersData countersData)
+            [Parameter(typeof(MetricSinkThreshold))] int metricSinkThreshold,
+            MetricsData metricsData)
         {
             _metricsSinks = metricsSinks;
-            _counterSinkThreshold = counterSinkThreshold;
-            _countersData = countersData;
+            _metricSinkThreshold = metricSinkThreshold;
+            _metricsData = metricsData;
         }
 
         /// <summary>
@@ -73,22 +73,22 @@ namespace Org.Apache.REEF.Common.Telemetry
         public void OnNext(IContextMessage contextMessage)
         {
             var msgReceived = ByteUtilities.ByteArraysToString(contextMessage.Message);
-            var counters = new EvaluatorMetrics(msgReceived).GetMetricsCounters();
+            var metrics = new EvaluatorMetrics(msgReceived).GetMetrics();
 
-            Logger.Log(Level.Info, "Received {0} counters with context message: {1}.",
-                counters.GetCounters().Count(), msgReceived);
+            Logger.Log(Level.Info, "Received {0} metrics with context message: {1}.",
+                metrics.GetMetrics().Count(), msgReceived);
 
-            _countersData.Update(counters);
+            _metricsData.Update(metrics);
 
-            if (_countersData.TriggerSink(_counterSinkThreshold))
+            if (_metricsData.TriggerSink(_metricSinkThreshold))
             {
-                Sink(_countersData.GetCounterData());
-                _countersData.Reset();
+                Sink(_metricsData.GetMetricData());
+                _metricsData.Reset();
             }
         }
 
         /// <summary>
-        /// Call each Sink to sink the data in the counters
+        /// Call each Sink to sink the data in the metrics
         /// </summary>
         private void Sink(IEnumerable<KeyValuePair<string, string>> metrics)
         {
@@ -111,6 +111,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public void OnCompleted()
         {
+            Sink(_metricsData.GetMetricData());
             Logger.Log(Level.Info, "Completed");
         }
 

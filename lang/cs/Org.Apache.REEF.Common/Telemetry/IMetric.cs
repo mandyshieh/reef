@@ -15,12 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-using Org.Apache.REEF.Tang.Annotations;
+using System;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [NamedParameter(Documentation = "Threshold to trigger the sink.", ShortName = "CounterSinkThreshold", DefaultValue = "1")]
-    public class CounterSinkThreshold : Name<int>
+    public interface IMetric
     {
+        string Name { get; }
+
+        string Description { get; }
+
+        object ValueUntyped { get; }
+
+        long Timestamp { get; }
+    }
+
+    public interface IMetric<T> : IMetric
+    {
+        T Value { get; set; }
     }
 }
