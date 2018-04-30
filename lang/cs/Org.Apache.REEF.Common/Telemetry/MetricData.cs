@@ -74,54 +74,47 @@ namespace Org.Apache.REEF.Common.Telemetry
             _records.Clear();
         }
 
+        /// <summary>
+        /// When new metric data is received, update the value and records so it reflects the new data.
+        /// </summary>
+        /// <param name="metric">Metric data received.</param>
         internal void UpdateMetric(MetricData metric)
         {
-            if (metric.GetMetric().GetType() == _metric.GetType())
+            if (!(metric.GetMetric() is ICounter))
             {
-                if (metric.GetMetric().ValueUntyped != _metric.ValueUntyped || metric._records.Count > 0)
+                foreach (var r in metric._records)
                 {
-                    ChangesSinceLastSink += metric.ChangesSinceLastSink;
-                    IMetric tmp = _metric;
-                    foreach (var r in metric._records)
-                    {
-                        _records.Add(r);
-                    }
-                    _records.Add(tmp);
+                    _records.Add(r);
+                }
+                _records.Add(_metric);
+            }
+            ChangesSinceLastSink += metric.ChangesSinceLastSink;
+            _metric = metric.GetMetric(); // update current metric value
+        }
 
-                    //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the metric:
-                    //// if evaluator contains the aggregated values, the value will override existing value
-                    //// if evaluator only keep delta, the value should be added at here. But the value in the evaluator should be reset after message is sent
-                    //// For the metrics from multiple evaluators with the same metric name, the value should be aggregated here
-                    //// We also need to consider failure cases.  
-                    _metric = metric.GetMetric();
-                }
-                else
-                {
-                    Logger.Log(Level.Info, "Metric {0} not updated because value has not changed.", _metric.Name);
-                }
-            }
-            else
+        internal void UpdateMetric(IMetric me)
+        {
+            if (me.GetType() != _metric.GetType())
             {
-                Logger.Log(Level.Error, "Trying to update metric {0} of type {1} with type {2}", _metric.Name, _metric.GetType(), metric.GetType());
-                throw new Exception("Trying to update metric of type" + _metric.GetType() + " with type " + metric.GetType());
+                throw new ApplicationException("Trying to update metric of type " + _metric.GetType() + " with type " + me.GetType());
             }
+            if (!(me is ICounter))
+            {
+                _records.Add(_metric);
+            }
+            ChangesSinceLastSink++;
+            _metric = me; // update current metric value
         }
 
         internal void UpdateMetric(string name, object val)
         {
+            var tmp = _metric.Copy();
+            if (!(_metric is ICounter))
+            {
+                _records.Add(tmp);
+            }
+            _metric.ValueUntyped = val;
             ChangesSinceLastSink++;
-            var copy = _metric.Copy();
-            copy.ValueUntyped = val;
-
-            IMetric tmp = _metric;
-            _records.Add(tmp);
-
-            //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the metric:
-            //// if evaluator contains the aggregated values, the value will override existing value
-            //// if evaluator only keep delta, the value should be added at here. But the value in the evaluator should be reset after message is sent
-            //// For the metrics from multiple evaluators with the same metric name, the value should be aggregated here
-            //// We also need to consider failure cases.
-            _metric = copy;
         }
 
         internal IMetric GetMetric()
@@ -130,19 +123,17 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Get count name and value as KeyValuePair
+        /// Get KeyValuePair for every record and current metric value.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>This metric's values.</returns>
         internal IEnumerable<KeyValuePair<string, string>> GetKeyValuePair()
         {
-            // return new KeyValuePair<string, string>(_metric.Name, _metric.Value.ToString());
-            Logger.Log(Level.Info, "Getting KeyValuPair in MetricData.");
             var values = new List<KeyValuePair<string, string>>();
             foreach (var r in _records)
             {
                 values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
             }
-            Logger.Log(Level.Info, "Got MetricData: {0}", JsonConvert.SerializeObject(values));
+            values.Add(new KeyValuePair<string, string>(_metric.Name, _metric.ValueUntyped.ToString()));
             return values;
         }
     }

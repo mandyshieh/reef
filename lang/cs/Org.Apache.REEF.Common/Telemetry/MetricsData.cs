@@ -28,7 +28,7 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// <summary>
     /// This class maintains a collection of the data for all the metrics for metrics service. 
     /// When new metric data is received, the data in the collection will be updated.
-    /// After the data is processed, the increment since last process will be reset.
+    /// After the data is processed, the changes since last process will be reset.
     /// </summary>
     public sealed class MetricsData : IMetrics
     {
@@ -70,15 +70,14 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         internal MetricsData(IMetrics metrics)
         {
-            foreach (var m in metrics.GetMetrics())
+            foreach (var me in metrics.GetMetrics())
             {
-                _metricsMap.Add(m.GetMetric().Name, new MetricData(m.GetMetric()));
+                _metricsMap.Add(me.GetMetric().Name, new MetricData(me.GetMetric()));
             }
         }
 
         public bool TryRegisterMetric(IMetric metric)
         {
-            Logger.Log(Level.Info, "Registing metric {0}", metric.Name);
             lock (_metricLock)
             {
                 if (_metricsMap.ContainsKey(metric.Name))
@@ -114,7 +113,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Update metrics 
         /// </summary>
         /// <param name="metrics"></param>
-        internal void Update(MetricsData metrics)
+        internal void Update(IMetrics metrics)
         {
             foreach (var metric in metrics.GetMetrics())
             {
@@ -127,9 +126,6 @@ namespace Org.Apache.REEF.Common.Telemetry
                 {
                     _metricsMap.Add(me.Name, new MetricData(me));
                 }
-
-                Logger.Log(Level.Info, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changes since last sink: {4}.",
-                    me.Name, me.ValueUntyped, me.Description, new DateTime(me.Timestamp), _metricsMap[me.Name].ChangesSinceLastSink);
             }
         }
 
@@ -139,16 +135,13 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
                 {
-                    metricData.UpdateMetric(metricData);
+                    metricData.UpdateMetric(me);
                 }
                 else
                 {
                     _metricsMap.Add(me.Name, new MetricData(me));
                 }
             }
-
-            Logger.Log(Level.Info, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
-                me.Name, me.ValueUntyped, me.Description, new DateTime(me.Timestamp), _metricsMap[me.Name].ChangesSinceLastSink);
         }
 
         internal void Update(string name, object val)
@@ -179,28 +172,24 @@ namespace Org.Apache.REEF.Common.Telemetry
                     c.ResetChangeSinceLastSink();
                 }
             }
-            Logger.Log(Level.Info, "{0} metrics being reset in MetricsData.", _metricsMap.Count);
         }
 
         /// <summary>
         /// Convert the metric data into ISet for sink
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Key value pairs for all the metrics on record and their value.</returns>
         internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
         {
             Logger.Log(Level.Info, "Getting metric data to sink; there are ");
-            //// note: metric.Value is MetricData
             return _metricsMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
         }
 
-        /// TODO
         /// <summary>
         /// The condition that triggers the sink. The condition can be modified later.
         /// </summary>
         /// <returns></returns>
         internal bool TriggerSink(int metricSinkThreshold)
         {
-            Logger.Log(Level.Info, "Checking sink threshold on {0} metrics: {1}, current change is {2}", _metricsMap.Count, JsonConvert.SerializeObject(_metricsMap.Values), _metricsMap.Values.Sum(e => e.ChangesSinceLastSink));
             return _metricsMap.Values.Sum(e => e.ChangesSinceLastSink) > metricSinkThreshold;
         }
 

@@ -83,7 +83,6 @@ namespace Org.Apache.REEF.Common.Telemetry
 
             if (_metricsData.TriggerSink(_metricSinkThreshold))
             {
-                Logger.Log(Level.Info, "Metric Sink Triggered because changed exceeded {0}; sinking MetricsData now.", _metricSinkThreshold);
                 Sink(_metricsData.GetMetricData());
                 _metricsData.Reset();
             }
@@ -94,10 +93,8 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         private void Sink(IEnumerable<KeyValuePair<string, string>> metrics)
         {
-            Logger.Log(Level.Info, "Launching SINK tasks for {0} sinks.", _metricsSinks.Count);
             foreach (var s in _metricsSinks)
             {
-                Logger.Log(Level.Info, "Sinking for sink of type {0}", s.GetType());
                 try
                 {
                     //// Task.Run(() => s.Sink(metrics));

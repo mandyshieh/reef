@@ -36,17 +36,20 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             metrics1.TryRegisterMetric(new Counter("counter2", "counter2 description"));
             ValidateMetric(metrics1, "counter1", 0);
             ValidateMetric(metrics1, "counter2", 0);
-            metrics1.Update("counter1", 3);
-            metrics1.Update("counter2", 5);
-            ValidateMetric(metrics1, "counter1", 3);
-            ValidateMetric(metrics1, "counter2", 5);
+            for (int i = 0; i < 5; i++)
+            {
+                metrics1.Update("counter1", i);
+                metrics1.Update("counter2", i * 2);
+            }
+            ValidateMetric(metrics1, "counter1", 4);
+            ValidateMetric(metrics1, "counter2", 8);
 
             var counterStr = metrics1.Serialize();
 
             var evalMetrics2 = new EvaluatorMetrics(counterStr);
             var metrics2 = evalMetrics2.GetMetrics();
-            ValidateMetric(metrics2, "counter1", 3);
-            ValidateMetric(metrics2, "counter2", 5);
+            ValidateMetric(metrics2, "counter1", 4);
+            ValidateMetric(metrics2, "counter2", 8);
         }
 
         /// <summary>
@@ -56,27 +59,27 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         public void TestMetricSetValue()
         {
             var metrics = CreateMetrics();
-            metrics.TryRegisterMetric(new DoubleGauge("dou1", "metric of type double", DateTime.Now.Ticks, 0));
+            metrics.TryRegisterMetric(new IntegerGauge("int1", "metric of type int", DateTime.Now.Ticks, 0));
             metrics.TryRegisterMetric(new DoubleGauge("dou2", "metric of type double", DateTime.Now.Ticks, 0));
-            ValidateMetric(metrics, "dou1", default(double));
+            ValidateMetric(metrics, "int1", default(int));
             ValidateMetric(metrics, "dou2", default(double));
 
-            metrics.TryGetValue("dou1", out IMetric me);
-            ((DoubleGauge)me).Value = 3.14;
+            metrics.Update(new IntegerGauge("int1", "new description", DateTime.Now.Ticks, 3));
+            metrics.Update("dou2", 3.14);
 
-            ValidateMetric(metrics, "dou1", 3.14);
-            ValidateMetric(metrics, "dou2", 0);
+            ValidateMetric(metrics, "int1", 3);
+            ValidateMetric(metrics, "dou2", 3.14);
         }
 
         /// <summary>
         /// Test TryRegisterCounter with a duplicated counter name
         /// </summary>
         [Fact]
-        public void TestDuplicatedCounters()
+        public void TestDuplicatedNames()
         {
-            var counters = CreateMetrics();
-            counters.TryRegisterMetric(new Counter("metric1", "metric description"));
-            Assert.False(counters.TryRegisterMetric(new DoubleGauge("metric1", "duplicate name")));
+            var metrics = CreateMetrics();
+            metrics.TryRegisterMetric(new Counter("metric1", "metric description"));
+            Assert.False(metrics.TryRegisterMetric(new Counter("metric1", "duplicate name")));
         }
 
         private static void ValidateMetric(IMetrics metricSet, string name, object expectedValue)
@@ -85,7 +88,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             Assert.Equal(expectedValue, metric.ValueUntyped);
         }
 
-        private static IMetrics CreateMetrics()
+        private static MetricsData CreateMetrics()
         {
             var m = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
             var c = m.GetMetrics();

@@ -264,7 +264,6 @@ under the License.
     <Compile Include="Telemetry\MessageSenderConfigurationModule.cs" />
     <Compile Include="Telemetry\MetricData.cs" />
     <Compile Include="Telemetry\MetricsData.cs" />
-    <Compile Include="Telemetry\MetricsImpl.cs" />
     <Compile Include="Telemetry\MetricSinks.cs" />
     <Compile Include="Telemetry\MetricSinkThreshold.cs" />
     <Compile Include="Telemetry\MetricsMessageSender.cs" />
