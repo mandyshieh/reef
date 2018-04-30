@@ -22,7 +22,6 @@ using Org.Apache.REEF.Utilities.Attributes;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     [Unstable("0.16", "This is to build a collection of metrics for evaluator metrics.")]
-    [DefaultImplementation(typeof(MetricsImpl))]
     public interface IMetrics
     {
         /// <summary>
@@ -47,7 +46,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Returns all the metrics
         /// </summary>
         /// <returns></returns>
-        IEnumerable<IMetric> GetMetrics();
+        IEnumerable<MetricData> GetMetrics();
 
         /// <summary>
         /// Serialize the metrics into strings

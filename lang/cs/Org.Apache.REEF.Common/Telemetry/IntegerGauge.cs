@@ -5,33 +5,33 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    class DoubleGauge : IMetric<double>
+    class IntegerGauge : IMetric<int>
     {
         private string _name;
         private string _description;
-        private double _typedValue;
+        private int _typedValue;
         private long _timestamp;
 
         public string Name => _name;
 
         public string Description => _description;
 
-        public object ValueUntyped { get => _typedValue; set => _typedValue = Convert.ToDouble(value); }
+        public object ValueUntyped { get => _typedValue; set => _typedValue = Convert.ToInt32(value); }
 
         public long Timestamp => _timestamp;
 
-        public double Value { get => _typedValue; set => _typedValue = Convert.ToDouble(value); }
+        public int Value { get => _typedValue; set => _typedValue = Convert.ToInt32(value); }
 
-        public DoubleGauge(string name, string description)
+        public IntegerGauge(string name, string description)
         {
             _name = name;
             _description = description;
             _timestamp = DateTime.Now.Ticks;
-            _typedValue = default(double);
+            _typedValue = default(int);
         }
 
         [JsonConstructor]
-        internal DoubleGauge(string name, string description, long timeStamp, double value)
+        internal IntegerGauge(string name, string description, long timeStamp, int value)
         {
             _name = name;
             _description = description;
@@ -41,7 +41,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public IMetric Copy()
         {
-            return new DoubleGauge(_name, _description, _timestamp, _typedValue);
+            return new IntegerGauge(_name, _description, _timestamp, _typedValue);
         }
     }
 }

@@ -36,18 +36,17 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             metrics1.TryRegisterMetric(new Counter("counter2", "counter2 description"));
             ValidateMetric(metrics1, "counter1", 0);
             ValidateMetric(metrics1, "counter2", 0);
-            metrics1.TryGetValue("counter1", out IMetric me);
-            var co1 = (Counter)me;
-            co1.Increment();
-            co1.Increment(3);
-            co1.Decrement(2);
-            Assert.Equal(me.ValueUntyped, 2);
+            metrics1.Update("counter1", 3);
+            metrics1.Update("counter2", 5);
+            ValidateMetric(metrics1, "counter1", 3);
+            ValidateMetric(metrics1, "counter2", 5);
+
             var counterStr = metrics1.Serialize();
 
             var evalMetrics2 = new EvaluatorMetrics(counterStr);
             var metrics2 = evalMetrics2.GetMetrics();
-            ValidateMetric(metrics2, "counter1", 2);
-            ValidateMetric(metrics2, "counter2", 0);
+            ValidateMetric(metrics2, "counter1", 3);
+            ValidateMetric(metrics2, "counter2", 5);
         }
 
         /// <summary>

@@ -23,10 +23,10 @@ namespace Org.Apache.REEF.Common.Telemetry
     [Unstable("0.16", "This is to build a simple metrics with metrics only. More metrics will be added in future.")]
     internal sealed class EvaluatorMetrics : IEvaluatorMetrics
     {
-        private readonly IMetrics _metrics;
+        private readonly MetricsData _metrics;
 
         [Inject]
-        private EvaluatorMetrics(IMetrics metrics)
+        private EvaluatorMetrics(MetricsData metrics)
         {
             _metrics = metrics;
         }
@@ -37,14 +37,14 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="serializedMsg"></param>
         internal EvaluatorMetrics(string serializedMsg)
         {
-            _metrics = new MetricsImpl(serializedMsg);
+            _metrics = new MetricsData(serializedMsg);
         }
 
         /// <summary>
         /// Returns metrics
         /// </summary>
         /// <returns>Returns metrics.</returns>
-        public IMetrics GetMetrics()
+        public MetricsData GetMetrics()
         {
             return _metrics;
         }

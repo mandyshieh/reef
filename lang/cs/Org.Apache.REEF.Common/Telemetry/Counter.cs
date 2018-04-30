@@ -12,7 +12,6 @@
 // under the License.
 
 using System;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Org.Apache.REEF.Utilities.Attributes;
 
@@ -35,11 +34,11 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public string Description => _description;
 
-        public object ValueUntyped => _typedValue;
+        public object ValueUntyped { get => _typedValue; set => _typedValue = Convert.ToInt32(value); }
 
         public long Timestamp => _timestamp;
 
-        public int Value { get => _typedValue; set => _typedValue = value; }
+        public int Value { get => _typedValue; set => _typedValue = Convert.ToInt32(value); }
 
         public Counter(string name, string description)
         {
@@ -84,6 +83,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             _typedValue -= number;
             _timestamp = DateTime.Now.Ticks;
+        }
+
+        public IMetric Copy()
+        {
+            return new Counter(_name, _description, _timestamp, _typedValue);
         }
     }
 }

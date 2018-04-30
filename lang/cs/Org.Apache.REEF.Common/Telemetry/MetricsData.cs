@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Org.Apache.REEF.Tang.Annotations;
 using Org.Apache.REEF.Utilities.Logging;
+using Newtonsoft.Json;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
@@ -29,14 +30,24 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// When new metric data is received, the data in the collection will be updated.
     /// After the data is processed, the increment since last process will be reset.
     /// </summary>
-    internal sealed class MetricsData
+    public sealed class MetricsData : IMetrics
     {
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsData));
+
+        JsonSerializerSettings settings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
 
         /// <summary>
         /// Registration of metrics
         /// </summary>
-        private readonly IDictionary<string, MetricData> _metricMap = new ConcurrentDictionary<string, MetricData>();
+        private IDictionary<string, MetricData> _metricsMap = new ConcurrentDictionary<string, MetricData>();
+
+        /// <summary>
+        /// The lock for metrics
+        /// </summary>
+        private readonly object _metricLock = new object();
 
         [Inject]
         private MetricsData()
@@ -44,24 +55,115 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
+        /// Deserialization.
+        /// </summary>
+        /// <param name="serializedMetricsString"></param>
+        [JsonConstructor]
+        internal MetricsData(string serializedMetricsString)
+        {
+            var metrics = JsonConvert.DeserializeObject<IList<MetricData>>(serializedMetricsString, settings);
+            foreach (var m in metrics)
+            {
+                _metricsMap.Add(m.GetMetric().Name, m);
+            }
+        }
+
+        internal MetricsData(IMetrics metrics)
+        {
+            foreach (var m in metrics.GetMetrics())
+            {
+                _metricsMap.Add(m.GetMetric().Name, new MetricData(m.GetMetric()));
+            }
+        }
+
+        public bool TryRegisterMetric(IMetric metric)
+        {
+            Logger.Log(Level.Info, "Registing metric {0}", metric.Name);
+            lock (_metricLock)
+            {
+                if (_metricsMap.ContainsKey(metric.Name))
+                {
+                    Logger.Log(Level.Warning, "The metric [{0}] already exists.", metric.Name);
+                    return false;
+                }
+                _metricsMap.Add(metric.Name, new MetricData(metric));
+            }
+            return true;
+        }
+
+        public bool TryGetValue(string name, out IMetric me)
+        {
+            lock (_metricLock)
+            {
+                if (!_metricsMap.TryGetValue(name, out MetricData md))
+                {
+                    me = null;
+                    return false;
+                }
+                me = md.GetMetric();
+            }
+            return true;
+        }
+
+        public IEnumerable<MetricData> GetMetrics()
+        {
+            return _metricsMap.Values;
+        }
+
+        /// <summary>
         /// Update metrics 
         /// </summary>
         /// <param name="metrics"></param>
-        internal void Update(IMetrics metrics)
+        internal void Update(MetricsData metrics)
         {
             foreach (var metric in metrics.GetMetrics())
             {
-                if (_metricMap.TryGetValue(metric.Name, out MetricData metricData))
+                var me = metric.GetMetric();
+                if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
                 {
                     metricData.UpdateMetric(metric);
                 }
                 else
                 {
-                    _metricMap.Add(metric.Name, new MetricData(metric));
+                    _metricsMap.Add(me.Name, new MetricData(me));
                 }
 
-                Logger.Log(Level.Verbose, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
-                    metric.Name, metric.ValueUntyped, metric.Description, new DateTime(metric.Timestamp), _metricMap[metric.Name].ChangesSinceLastSink);
+                Logger.Log(Level.Info, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changes since last sink: {4}.",
+                    me.Name, me.ValueUntyped, me.Description, new DateTime(me.Timestamp), _metricsMap[me.Name].ChangesSinceLastSink);
+            }
+        }
+
+        internal void Update(IMetric me)
+        {
+            lock (_metricLock)
+            {
+                if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
+                {
+                    metricData.UpdateMetric(metricData);
+                }
+                else
+                {
+                    _metricsMap.Add(me.Name, new MetricData(me));
+                }
+            }
+
+            Logger.Log(Level.Info, "Metric name: {0}, value: {1}, description: {2}, time: {3},  changed since last sink: {4}.",
+                me.Name, me.ValueUntyped, me.Description, new DateTime(me.Timestamp), _metricsMap[me.Name].ChangesSinceLastSink);
+        }
+
+        internal void Update(string name, object val)
+        {
+            lock (_metricLock)
+            {
+                if (_metricsMap.TryGetValue(name, out MetricData me))
+                {
+                    me.UpdateMetric(name, val);
+                }
+                else
+                {
+                    Logger.Log(Level.Error, "Metric {0} needs to be registered before it can be updated with value {1}.", name, val);
+                    throw new Exception("Metric " + name + " has not been registered.");
+                }
             }
         }
 
@@ -70,10 +172,14 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         internal void Reset()
         {
-            foreach (var c in _metricMap.Values)
+            lock (_metricLock)
             {
-                c.ResetChangeSinceLastSink();
+                foreach (var c in _metricsMap.Values)
+                {
+                    c.ResetChangeSinceLastSink();
+                }
             }
+            Logger.Log(Level.Info, "{0} metrics being reset in MetricsData.", _metricsMap.Count);
         }
 
         /// <summary>
@@ -82,7 +188,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <returns></returns>
         internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
         {
-            return _metricMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
+            Logger.Log(Level.Info, "Getting metric data to sink; there are ");
+            //// note: metric.Value is MetricData
+            return _metricsMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
         }
 
         /// TODO
@@ -92,7 +200,20 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <returns></returns>
         internal bool TriggerSink(int metricSinkThreshold)
         {
-            return _metricMap.Values.Sum(e => e.ChangesSinceLastSink) > metricSinkThreshold;
+            Logger.Log(Level.Info, "Checking sink threshold on {0} metrics: {1}, current change is {2}", _metricsMap.Count, JsonConvert.SerializeObject(_metricsMap.Values), _metricsMap.Values.Sum(e => e.ChangesSinceLastSink));
+            return _metricsMap.Values.Sum(e => e.ChangesSinceLastSink) > metricSinkThreshold;
+        }
+
+        public string Serialize()
+        {
+            lock (_metricLock)
+            {
+                if (_metricsMap.Count > 0)
+                {
+                    return JsonConvert.SerializeObject(_metricsMap.Values.ToList(), settings);
+                }
+            }
+            return null;
         }
     }
 }

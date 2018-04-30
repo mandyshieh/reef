@@ -28,9 +28,11 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         string Description { get; }
 
-        object ValueUntyped { get; }
+        object ValueUntyped { get; set; }
 
         long Timestamp { get; }
+
+        IMetric Copy();
     }
 
     public interface IMetric<T> : IMetric
