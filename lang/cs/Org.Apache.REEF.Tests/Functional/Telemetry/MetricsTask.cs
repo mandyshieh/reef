@@ -38,9 +38,9 @@ namespace Org.Apache.REEF.Tests.Functional.Telemetry
         [Inject]
         private MetricsTask(IEvaluatorMetrics evaluatorMetrics)
         {
-            _counters = evaluatorMetrics.GetMetricsCounters();
-            _counters.TryRegisterCounter(TestCounter1, "This is " + TestCounter1);
-            _counters.TryRegisterCounter(TestCounter2, "This is " + TestCounter2);
+            _metricSet = evaluatorMetrics.GetMetrics();
+            _metricSet.TryRegisterMetric(new Counter(TestCounter, TestCounter + " description"));
+            _metricSet.TryRegisterMetric(new IntegerGauge(TestIntGauge, TestIntGauge + " description"));
         }
 
         public byte[] Call(byte[] memento)

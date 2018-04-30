@@ -82,8 +82,8 @@ namespace Org.Apache.REEF.Common.Telemetry
 
             if (_countersData.TriggerSink(_counterSinkThreshold))
             {
-                Sink(_countersData.GetCounterData());
-                _countersData.Reset();
+                Sink(_metricsData.GetMetricData());
+                _metricsData.Reset();
             }
         }
 

@@ -25,9 +25,9 @@ using Org.Apache.REEF.Utilities.Logging;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// This class maintains a collection of the data for all the counters for metrics service. 
-    /// When new counter data is received, the data in the collection will be updated.
-    /// After the data is processed, the increment since last process will be reset.
+    /// This class maintains a collection of the data for all the metrics for metrics service. 
+    /// When new metric data is received, the data in the collection will be updated.
+    /// After the data is processed, the changes since last process will be reset.
     /// </summary>
     internal sealed class CountersData
     {
@@ -51,15 +51,85 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             foreach (var counter in counters.GetCounters())
             {
-                CounterData counterData;
-                if (_counterMap.TryGetValue(counter.Name, out counterData))
+                _metricsMap.Add(m.GetMetric().Name, m);
+            }
+        }
+
+        internal MetricsData(IMetrics metrics)
+        {
+            foreach (var me in metrics.GetMetrics())
+            {
+                _metricsMap.Add(me.GetMetric().Name, new MetricData(me.GetMetric()));
+            }
+        }
+
+        public bool TryRegisterMetric(IMetric metric)
+        {
+            lock (_metricLock)
+            {
+                if (_metricsMap.ContainsKey(metric.Name))
                 {
-                    counterData.UpdateCounter(counter);
+                    Logger.Log(Level.Warning, "The metric [{0}] already exists.", metric.Name);
+                    return false;
+                }
+                _metricsMap.Add(metric.Name, new MetricData(metric));
+            }
+            return true;
+        }
+
+        public bool TryGetValue(string name, out IMetric me)
+        {
+            lock (_metricLock)
+            {
+                if (!_metricsMap.TryGetValue(name, out MetricData md))
+                {
+                    me = null;
+                    return false;
+                }
+                me = md.GetMetric();
+            }
+            return true;
+        }
+
+        public IEnumerable<MetricData> GetMetrics()
+        {
+            return _metricsMap.Values;
+        }
+
+        /// <summary>
+        /// Update metrics 
+        /// </summary>
+        /// <param name="metrics"></param>
+        internal void Update(IMetrics metrics)
+        {
+            foreach (var metric in metrics.GetMetrics())
+            {
+                var me = metric.GetMetric();
+                if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
+                {
+                    metricData.UpdateMetric(metric);
+                }
+                else
+                {
+                    _metricsMap.Add(me.Name, new MetricData(me));
+                }
+            }
+        }
+
+        internal void Update(IMetric me)
+        {
+            lock (_metricLock)
+            {
+                if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
+                {
+                    metricData.UpdateMetric(me);
                 }
                 else
                 {
                     _counterMap.Add(counter.Name, new CounterData(counter, counter.Value));
                 }
+            }
+        }
 
                 Logger.Log(Level.Verbose, "Counter name: {0}, value: {1}, description: {2}, time: {3},  incrementSinceLastSink: {4}.",
                     counter.Name, counter.Value, counter.Description, new DateTime(counter.Timestamp), _counterMap[counter.Name].IncrementSinceLastSink);
@@ -80,17 +150,23 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// Convert the counter data into ISet for sink
         /// </summary>
-        /// <returns></returns>
-        internal IEnumerable<KeyValuePair<string, string>> GetCounterData()
+        /// <returns>Key value pairs for all the metrics on record and their value.</returns>
+        internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
         {
-            return _counterMap.Select(counter => counter.Value.GetKeyValuePair());
+            Logger.Log(Level.Info, "Getting metric data to sink; there are ");
+            return _metricsMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
         }
 
         /// <summary>
         /// The condition that triggers the sink. The condition can be modified later.
         /// </summary>
         /// <returns></returns>
-        internal bool TriggerSink(int counterSinkThreshold)
+        internal bool TriggerSink(int metricSinkThreshold)
+        {
+            return _metricsMap.Values.Sum(e => e.ChangesSinceLastSink) > metricSinkThreshold;
+        }
+
+        public string Serialize()
         {
             return _counterMap.Values.Sum(e => e.IncrementSinceLastSink) > counterSinkThreshold;
         }

@@ -53,25 +53,67 @@ namespace Org.Apache.REEF.Common.Telemetry
             IncrementSinceLastSink = 0;
         }
 
-        internal void UpdateCounter(ICounter counter)
+        /// <summary>
+        /// When new metric data is received, update the value and records so it reflects the new data.
+        /// </summary>
+        /// <param name="metric">Metric data received.</param>
+        internal void UpdateMetric(MetricData metric)
         {
-            IncrementSinceLastSink += counter.Value - _counter.Value;
+            if (!(metric.GetMetric() is ICounter))
+            {
+                foreach (var r in metric._records)
+                {
+                    _records.Add(r);
+                }
+                _records.Add(_metric);
+            }
+            ChangesSinceLastSink += metric.ChangesSinceLastSink;
+            _metric = metric.GetMetric(); // update current metric value
+        }
 
-            //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the counter:
-            //// if evaluator contains the aggregated values, the value will override existing value
-            //// if evaluator only keep delta, the value should be added at here. But the value in the evaluator should be reset after message is sent
-            //// For the counters from multiple evaluators with the same counter name, the value should be aggregated here
-            //// We also need to consider failure cases.  
-            _counter = counter;
+        internal void UpdateMetric(IMetric me)
+        {
+            if (me.GetType() != _metric.GetType())
+            {
+                throw new ApplicationException("Trying to update metric of type " + _metric.GetType() + " with type " + me.GetType());
+            }
+            if (!(me is ICounter))
+            {
+                _records.Add(_metric);
+            }
+            ChangesSinceLastSink++;
+            _metric = me; // update current metric value
+        }
+
+        internal void UpdateMetric(string name, object val)
+        {
+            var tmp = _metric.Copy();
+            if (!(_metric is ICounter))
+            {
+                _records.Add(tmp);
+            }
+            _metric.ValueUntyped = val;
+            ChangesSinceLastSink++;
+        }
+
+        internal IMetric GetMetric()
+        {
+            return _metric;
         }
 
         /// <summary>
-        /// Get count name and value as KeyValuePair
+        /// Get KeyValuePair for every record and current metric value.
         /// </summary>
-        /// <returns></returns>
-        internal KeyValuePair<string, string> GetKeyValuePair()
+        /// <returns>This metric's values.</returns>
+        internal IEnumerable<KeyValuePair<string, string>> GetKeyValuePair()
         {
-            return new KeyValuePair<string, string>(_counter.Name, _counter.Value.ToString());
+            var values = new List<KeyValuePair<string, string>>();
+            foreach (var r in _records)
+            {
+                values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
+            }
+            values.Add(new KeyValuePair<string, string>(_metric.Name, _metric.ValueUntyped.ToString()));
+            return values;
         }
     }
 }

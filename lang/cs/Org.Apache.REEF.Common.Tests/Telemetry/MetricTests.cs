@@ -31,12 +31,19 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         [Fact]
         public void TestEvaluatorMetrics()
         {
-            var metrics = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
-            var counters = metrics.GetMetricsCounters();
-            counters.TryRegisterCounter("counter1", "counter1 description");
-            counters.TryRegisterCounter("counter2", "counter2 description");
-            ValidateCounter(counters, "counter1", 0);
-            ValidateCounter(counters, "counter2", 0);
+            var evalMetrics1 = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
+            var metrics1 = evalMetrics1.GetMetrics();
+            metrics1.TryRegisterMetric(new Counter("counter1", "counter1 description"));
+            metrics1.TryRegisterMetric(new Counter("counter2", "counter2 description"));
+            ValidateMetric(metrics1, "counter1", 0);
+            ValidateMetric(metrics1, "counter2", 0);
+            for (int i = 0; i < 5; i++)
+            {
+                metrics1.Update("counter1", i);
+                metrics1.Update("counter2", i * 2);
+            }
+            ValidateMetric(metrics1, "counter1", 4);
+            ValidateMetric(metrics1, "counter2", 8);
 
             counters.Increment("counter1", 3);
             counters.Increment("counter1", 1);
@@ -45,12 +52,10 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             ValidateCounter(counters, "counter1", 4);
             ValidateCounter(counters, "counter2", 5);
 
-            var counterStr = metrics.Serialize();
-
-            var metrics2 = new EvaluatorMetrics(counterStr);
-            var counters2 = metrics2.GetMetricsCounters();
-            ValidateCounter(counters2, "counter1", 4);
-            ValidateCounter(counters2, "counter2", 5);
+            var evalMetrics2 = new EvaluatorMetrics(counterStr);
+            var metrics2 = evalMetrics2.GetMetrics();
+            ValidateMetric(metrics2, "counter1", 4);
+            ValidateMetric(metrics2, "counter2", 8);
         }
 
         /// <summary>
@@ -59,20 +64,28 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         [Fact]
         public void TestDuplicatedCounters()
         {
-            var counters = CreateCounters();
-            counters.TryRegisterCounter("counter1", "counter1 description");
-            Assert.False(counters.TryRegisterCounter("counter1", "counter1 description"));
+            var metrics = CreateMetrics();
+            metrics.TryRegisterMetric(new IntegerGauge("int1", "metric of type int", DateTime.Now.Ticks, 0));
+            metrics.TryRegisterMetric(new DoubleGauge("dou2", "metric of type double", DateTime.Now.Ticks, 0));
+            ValidateMetric(metrics, "int1", default(int));
+            ValidateMetric(metrics, "dou2", default(double));
+
+            metrics.Update(new IntegerGauge("int1", "new description", DateTime.Now.Ticks, 3));
+            metrics.Update("dou2", 3.14);
+
+            ValidateMetric(metrics, "int1", 3);
+            ValidateMetric(metrics, "dou2", 3.14);
         }
 
         /// <summary>
         /// Test Increment for a non-registered counter.
         /// </summary>
         [Fact]
-        public void TestNoExistCounter()
+        public void TestDuplicatedNames()
         {
-            var counters = CreateCounters();
-            Action increment = () => counters.Increment("counter1", 2);
-            Assert.Throws<ApplicationException>(increment);
+            var metrics = CreateMetrics();
+            metrics.TryRegisterMetric(new Counter("metric1", "metric description"));
+            Assert.False(metrics.TryRegisterMetric(new Counter("metric1", "duplicate name")));
         }
 
         private static void ValidateCounter(ICounters counters, string name, int expectedValue)
@@ -82,7 +95,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             Assert.Equal(expectedValue, c1.Value);
         }
 
-        private static ICounters CreateCounters()
+        private static MetricsData CreateMetrics()
         {
             var m = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
             var c = m.GetMetricsCounters();
