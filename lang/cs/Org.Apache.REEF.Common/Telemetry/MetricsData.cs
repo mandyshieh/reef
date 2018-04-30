@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Org.Apache.REEF.Tang.Annotations;
 using Org.Apache.REEF.Utilities.Logging;
+using Newtonsoft.Json;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
@@ -29,27 +30,39 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// When new metric data is received, the data in the collection will be updated.
     /// After the data is processed, the changes since last process will be reset.
     /// </summary>
-    internal sealed class CountersData
+    public sealed class MetricsData : IMetrics
     {
-        private static readonly Logger Logger = Logger.GetLogger(typeof(CountersData));
+        private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsData));
+
+        JsonSerializerSettings settings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
 
         /// <summary>
-        /// Registration of counters
+        /// Registration of metrics
         /// </summary>
-        private readonly IDictionary<string, CounterData> _counterMap = new ConcurrentDictionary<string, CounterData>();
+        private IDictionary<string, MetricData> _metricsMap = new ConcurrentDictionary<string, MetricData>();
+
+        /// <summary>
+        /// The lock for metrics
+        /// </summary>
+        private readonly object _metricLock = new object();
 
         [Inject]
-        private CountersData()
-        {            
+        private MetricsData()
+        {
         }
 
         /// <summary>
-        /// Update counters 
+        /// Deserialization.
         /// </summary>
-        /// <param name="counters"></param>
-        internal void Update(ICounters counters)
+        /// <param name="serializedMetricsString"></param>
+        [JsonConstructor]
+        internal MetricsData(string serializedMetricsString)
         {
-            foreach (var counter in counters.GetCounters())
+            var metrics = JsonConvert.DeserializeObject<IList<MetricData>>(serializedMetricsString, settings);
+            foreach (var m in metrics)
             {
                 _metricsMap.Add(m.GetMetric().Name, m);
             }
@@ -126,29 +139,43 @@ namespace Org.Apache.REEF.Common.Telemetry
                 }
                 else
                 {
-                    _counterMap.Add(counter.Name, new CounterData(counter, counter.Value));
+                    _metricsMap.Add(me.Name, new MetricData(me));
                 }
             }
         }
 
-                Logger.Log(Level.Verbose, "Counter name: {0}, value: {1}, description: {2}, time: {3},  incrementSinceLastSink: {4}.",
-                    counter.Name, counter.Value, counter.Description, new DateTime(counter.Timestamp), _counterMap[counter.Name].IncrementSinceLastSink);
+        internal void Update(string name, object val)
+        {
+            lock (_metricLock)
+            {
+                if (_metricsMap.TryGetValue(name, out MetricData me))
+                {
+                    me.UpdateMetric(name, val);
+                }
+                else
+                {
+                    Logger.Log(Level.Error, "Metric {0} needs to be registered before it can be updated with value {1}.", name, val);
+                    throw new Exception("Metric " + name + " has not been registered.");
+                }
             }
         }
 
         /// <summary>
-        /// Reset increment since last sink for each counter
+        /// Reset changed since last sink for each metric
         /// </summary>
         internal void Reset()
         {
-            foreach (var c in _counterMap.Values)
+            lock (_metricLock)
             {
-                c.ResetSinceLastSink();
+                foreach (var c in _metricsMap.Values)
+                {
+                    c.ResetChangeSinceLastSink();
+                }
             }
         }
 
         /// <summary>
-        /// Convert the counter data into ISet for sink
+        /// Convert the metric data into ISet for sink
         /// </summary>
         /// <returns>Key value pairs for all the metrics on record and their value.</returns>
         internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
@@ -168,7 +195,14 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public string Serialize()
         {
-            return _counterMap.Values.Sum(e => e.IncrementSinceLastSink) > counterSinkThreshold;
+            lock (_metricLock)
+            {
+                if (_metricsMap.Count > 0)
+                {
+                    return JsonConvert.SerializeObject(_metricsMap.Values.ToList(), settings);
+                }
+            }
+            return null;
         }
     }
 }

@@ -16,20 +16,19 @@
 // under the License.
 
 using System;
-using System.Collections.Generic;
 using Org.Apache.REEF.Common.Telemetry;
 using Org.Apache.REEF.Tang.Implementations.Tang;
 using Xunit;
 
 namespace Org.Apache.REEF.Common.Tests.Telemetry
 {
-    public class CounterTests
+    public class MetricsTests
     {
         /// <summary>
-        /// Test ICounters and IEvaluatorMetrics API.
+        /// Test IMetrics, ICounters and IEvaluatorMetrics API.
         /// </summary>
         [Fact]
-        public void TestEvaluatorMetrics()
+        public void TestEvaluatorMetricsCountersOnly()
         {
             var evalMetrics1 = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
             var metrics1 = evalMetrics1.GetMetrics();
@@ -45,12 +44,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             ValidateMetric(metrics1, "counter1", 4);
             ValidateMetric(metrics1, "counter2", 8);
 
-            counters.Increment("counter1", 3);
-            counters.Increment("counter1", 1);
-            counters.Increment("counter2", 2);
-            counters.Increment("counter2", 3);
-            ValidateCounter(counters, "counter1", 4);
-            ValidateCounter(counters, "counter2", 5);
+            var counterStr = metrics1.Serialize();
 
             var evalMetrics2 = new EvaluatorMetrics(counterStr);
             var metrics2 = evalMetrics2.GetMetrics();
@@ -59,10 +53,10 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         }
 
         /// <summary>
-        /// Test TryRegisterCounter with a duplicated counter name
+        /// Tests updating metric value.
         /// </summary>
         [Fact]
-        public void TestDuplicatedCounters()
+        public void TestMetricSetValue()
         {
             var metrics = CreateMetrics();
             metrics.TryRegisterMetric(new IntegerGauge("int1", "metric of type int", DateTime.Now.Ticks, 0));
@@ -78,7 +72,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         }
 
         /// <summary>
-        /// Test Increment for a non-registered counter.
+        /// Test TryRegisterCounter with a duplicated counter name
         /// </summary>
         [Fact]
         public void TestDuplicatedNames()
@@ -88,17 +82,16 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             Assert.False(metrics.TryRegisterMetric(new Counter("metric1", "duplicate name")));
         }
 
-        private static void ValidateCounter(ICounters counters, string name, int expectedValue)
+        private static void ValidateMetric(IMetrics metricSet, string name, object expectedValue)
         {
-            ICounter c1;
-            counters.TryGetValue(name, out c1);
-            Assert.Equal(expectedValue, c1.Value);
+            metricSet.TryGetValue(name, out IMetric metric);
+            Assert.Equal(expectedValue, metric.ValueUntyped);
         }
 
         private static MetricsData CreateMetrics()
         {
             var m = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
-            var c = m.GetMetricsCounters();
+            var c = m.GetMetrics();
             return c;
         }
     }

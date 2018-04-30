@@ -15,6 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+using System;
 using Org.Apache.REEF.Common.Context;
 using Org.Apache.REEF.Tang.Annotations;
 using Org.Apache.REEF.Utilities;
@@ -58,7 +59,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             get
             {
+                Logger.Log(Level.Info, "Getting context msg for eval metrics.");
                 var s = _evaluatorMetrics.Serialize();
+                _evaluatorMetrics.GetMetrics().Reset();
                 if (s != null)
                 {
                     return Optional<ContextMessage>.Of(

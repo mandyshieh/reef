@@ -1,8 +1,4 @@
-﻿// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
+﻿// to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
@@ -15,12 +11,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-using Org.Apache.REEF.Tang.Annotations;
+using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [NamedParameter(Documentation = "Threshold to trigger the sink.", ShortName = "MetricSinkThreshold", DefaultValue = "1")]
-    public class MetricSinkThreshold : Name<int>
-    {
+    [Unstable("0.16", "This is a simple counter for evaluator metrics.")]
+    public interface ICounter : IMetric<int>
+    { 
+        /// <summary>
+        /// Increase the current counter value with the number specified.
+        /// </summary>
+        void Increment(int number);
+
+        void Increment();
+
+        void Decrement();
+
+        void Decrement(int number);
     }
 }
