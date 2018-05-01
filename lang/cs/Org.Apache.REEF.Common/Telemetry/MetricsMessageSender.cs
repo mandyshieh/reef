@@ -27,7 +27,6 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// <summary>
     /// This class implements IContextMessageSource that is responsible to send context message
     /// </summary>
-    [Unstable("0.16", "The metrics API is in development.")]
     internal sealed class MetricsMessageSender : IContextMessageSource
     {
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsMessageSender));

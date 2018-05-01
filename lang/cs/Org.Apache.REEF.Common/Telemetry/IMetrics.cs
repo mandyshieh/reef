@@ -21,7 +21,6 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a collection of metrics for evaluator metrics.")]
     public interface IMetrics
     {
         /// <summary>

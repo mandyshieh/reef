@@ -22,7 +22,6 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// The properties that need to be serialized will be revisited later. We should only serialize minimum data to reduce the network load
     /// For example, the name can be mapped to a unique number (byte) and description should not be serialized.
     /// </summary>
-    [Unstable("0.16", "This is a simple counter for evaluator metrics.")]
     internal sealed class Counter : ICounter
     {
         private string _name;

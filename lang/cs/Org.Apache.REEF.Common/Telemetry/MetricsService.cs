@@ -30,7 +30,6 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// <summary>
     /// Metrics service. It is also a context message handler.
     /// </summary>
-    [Unstable("0.16", "This is a simple MetricsService. More functionalities will be added.")]
     internal sealed class MetricsService : IObserver<IContextMessage>, IObserver<IDriverMetrics>
     {
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsService));

@@ -20,7 +20,6 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a simple metrics with metrics only. More metrics will be added in future.")]
     internal sealed class EvaluatorMetrics : IEvaluatorMetrics
     {
         private readonly MetricsData _metrics;

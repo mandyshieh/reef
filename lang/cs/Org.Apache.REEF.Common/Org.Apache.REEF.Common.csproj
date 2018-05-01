@@ -264,7 +264,6 @@ under the License.
     <Compile Include="Telemetry\DefaultMetricsSink.cs" />
     <Compile Include="Telemetry\DriverMetricsObserverConfigurationModule.cs" />
     <Compile Include="Telemetry\DriverMetricsObservers.cs" />
-    <Compile Include="Telemetry\MetricBase.cs" />
     <Compile Include="Telemetry\MessageSenderConfigurationModule.cs" />
     <Compile Include="Telemetry\MetricSinks.cs" />
     <Compile Include="Telemetry\MetricsMessageSender.cs" />
