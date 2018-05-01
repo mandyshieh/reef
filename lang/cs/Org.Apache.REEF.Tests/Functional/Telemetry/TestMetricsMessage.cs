@@ -59,7 +59,7 @@ namespace Org.Apache.REEF.Tests.Functional.Telemetry
 
             var metricServiceConfig = MetricsServiceConfigurationModule.ConfigurationModule
                 .Set(MetricsServiceConfigurationModule.OnMetricsSink, GenericType<DefaultMetricsSink>.Class)
-                .Set(MetricsServiceConfigurationModule.CounterSinkThreshold, "5")
+                .Set(MetricsServiceConfigurationModule.MetricSinkThreshold, "5")
                 .Build();
 
             var driverMetricConfig = DriverMetricsObserverConfigurationModule.ConfigurationModule.Build();

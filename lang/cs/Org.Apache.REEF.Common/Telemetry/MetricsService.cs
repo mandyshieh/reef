@@ -96,7 +96,8 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 try
                 {
-                    Task.Run(() => s.Sink(metrics));
+                    //// Task.Run(() => s.Sink(metrics));
+                    s.Sink(metrics);
                 }
                 catch (Exception e)
                 {

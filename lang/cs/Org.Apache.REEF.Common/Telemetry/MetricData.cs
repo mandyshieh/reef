@@ -15,25 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
+using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Org.Apache.REEF.Utilities.Logging;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
     /// This class wraps a metric object and the increment value since last sink
     /// </summary>
-    internal sealed class MetricData
+    [JsonObject]
+    public sealed class MetricData
     {
+        private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsData));
+
         /// <summary>
         /// Metric object
         /// </summary>
-        private MetricBase _metric;
+        [JsonProperty]
+        private IMetric _metric;
 
-        private IList<MetricBase> _records;
+        [JsonProperty]
+        private IList<IMetric> _records;
 
         ///// <summary>
         ///// Whether metric has been updated since last sink.
         ///// </summary>
+        [JsonProperty]
         internal int ChangesSinceLastSink;
 
         /// <summary>
@@ -41,11 +50,19 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         /// <param name="metric"></param>
         /// <param name="initialValue"></param>
-        internal MetricData(MetricBase metric)
+        internal MetricData(IMetric metric)
         {
             _metric = metric;
             ChangesSinceLastSink = 0;
-            _records = new List<MetricBase>();
+            _records = new List<IMetric>();
+        }
+
+        [JsonConstructor]
+        internal MetricData(IMetric metric, IList<IMetric> records, int changes)
+        {
+            _metric = metric;
+            _records = records;
+            ChangesSinceLastSink = changes;
         }
 
         /// <summary>
@@ -57,32 +74,66 @@ namespace Org.Apache.REEF.Common.Telemetry
             _records.Clear();
         }
 
-        internal void UpdateMetric(MetricBase metric)
+        /// <summary>
+        /// When new metric data is received, update the value and records so it reflects the new data.
+        /// </summary>
+        /// <param name="metric">Metric data received.</param>
+        internal void UpdateMetric(MetricData metric)
         {
-            ChangesSinceLastSink++;
-            MetricBase tmp = _metric;
-            _records.Add(tmp);
+            if (!(metric.GetMetric() is ICounter))
+            {
+                foreach (var r in metric._records)
+                {
+                    _records.Add(r);
+                }
+                _records.Add(_metric);
+            }
+            ChangesSinceLastSink += metric.ChangesSinceLastSink;
+            _metric = metric.GetMetric(); // update current metric value
+        }
 
-            //// TODO: [REEF-1748] The following cases need to be considered in determine how to update the metric:
-            //// if evaluator contains the aggregated values, the value will override existing value
-            //// if evaluator only keep delta, the value should be added at here. But the value in the evaluator should be reset after message is sent
-            //// For the metrics from multiple evaluators with the same metric name, the value should be aggregated here
-            //// We also need to consider failure cases.  
-            _metric = metric;
+        internal void UpdateMetric(IMetric me)
+        {
+            if (me.GetType() != _metric.GetType())
+            {
+                throw new ApplicationException("Trying to update metric of type " + _metric.GetType() + " with type " + me.GetType());
+            }
+            if (!(me is ICounter))
+            {
+                _records.Add(_metric);
+            }
+            ChangesSinceLastSink++;
+            _metric = me; // update current metric value
+        }
+
+        internal void UpdateMetric(string name, object val)
+        {
+            var tmp = _metric.Copy();
+            if (!(_metric is ICounter))
+            {
+                _records.Add(tmp);
+            }
+            _metric.ValueUntyped = val;
+            ChangesSinceLastSink++;
+        }
+
+        internal IMetric GetMetric()
+        {
+            return _metric;
         }
 
         /// <summary>
-        /// Get count name and value as KeyValuePair
+        /// Get KeyValuePair for every record and current metric value.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>This metric's values.</returns>
         internal IEnumerable<KeyValuePair<string, string>> GetKeyValuePair()
         {
-            // return new KeyValuePair<string, string>(_metric.Name, _metric.Value.ToString());
             var values = new List<KeyValuePair<string, string>>();
             foreach (var r in _records)
             {
-                values.Add(new KeyValuePair<string, string>(_metric.Name, r.Value.ToString()));
+                values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
             }
+            values.Add(new KeyValuePair<string, string>(_metric.Name, _metric.ValueUntyped.ToString()));
             return values;
         }
     }
