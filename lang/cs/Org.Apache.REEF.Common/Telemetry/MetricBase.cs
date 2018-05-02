@@ -33,6 +33,8 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
+        public abstract bool IsImmutable { get; }
+
         public MetricBase(string name, string description)
         {
             Name = name;

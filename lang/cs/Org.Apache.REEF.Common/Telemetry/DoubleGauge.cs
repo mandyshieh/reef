@@ -7,6 +7,11 @@ namespace Org.Apache.REEF.Common.Telemetry
 {
     class DoubleGauge : MetricBase<double>
     {
+        public override bool IsImmutable
+        {
+            get { return true; }
+        }
+
         public DoubleGauge(string name, string description)
             : base(name, description)
         {

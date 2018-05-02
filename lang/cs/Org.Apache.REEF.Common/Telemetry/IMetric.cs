@@ -32,6 +32,8 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         long Timestamp { get; }
 
+        bool IsImmutable { get; }
+
         void Update(IMetric me);
 
         void Update(object val);

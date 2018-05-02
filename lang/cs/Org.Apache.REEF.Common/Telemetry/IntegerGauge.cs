@@ -7,6 +7,11 @@ namespace Org.Apache.REEF.Common.Telemetry
 {
     class IntegerGauge : MetricBase<int>
     {
+        public override bool IsImmutable
+        {
+            get { return true; }
+        }
+
         public IntegerGauge(string name, string description)
             : base(name, description)
         {

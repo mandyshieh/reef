@@ -45,6 +45,8 @@ namespace Org.Apache.REEF.Common.Telemetry
         [JsonProperty]
         internal int ChangesSinceLastSink;
 
+        private bool _keepUpdateRecord;
+
         /// <summary>
         /// Constructor for metricData
         /// </summary>
@@ -59,11 +61,12 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         [JsonConstructor]
-        internal MetricData(IMetric metric, IList<IMetric> records, int changes)
+        internal MetricData(IMetric metric, IList<IMetric> records, int changes, bool record)
         {
             _metric = metric;
             _records = records;
             ChangesSinceLastSink = changes;
+            _keepUpdateRecord = record;
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="metric">Metric data received.</param>
         internal void UpdateMetric(MetricData metric)
         {
-            if (!(metric.GetMetric() is ICounter) && metric.ChangesSinceLastSink > 0)
+            if (metric.GetMetric().IsImmutable && metric.ChangesSinceLastSink > 0)
             {
                 foreach (var r in metric._records)
                 {
@@ -98,7 +101,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 throw new ApplicationException("Trying to update metric of type " + _metric.GetType() + " with type " + me.GetType());
             }
-            if (!(me is ICounter))
+            if (me.IsImmutable)
             {
                 _records.Add(me);
             }
@@ -110,7 +113,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             var tmp = _metric.Copy();
             _metric.Update(val);
-            if (!(_metric is ICounter))
+            if (_metric.IsImmutable)
             {
                 _records.Add(_metric.Copy());
             }
@@ -130,7 +133,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             var values = new List<KeyValuePair<string, string>>();
 
-            if (!(_metric is ICounter))
+            if (_metric.IsImmutable)
             {
                 foreach (var r in _records)
                 {

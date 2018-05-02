@@ -24,6 +24,11 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// </summary>
     internal sealed class Counter : MetricBase<int>, ICounter
     {
+        public override bool IsImmutable
+        {
+            get { return false; }
+        }
+
         public Counter(string name, string description)
             : base(name, description)
         {
