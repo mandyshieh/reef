@@ -43,7 +43,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Returns metrics
         /// </summary>
         /// <returns>Returns metrics.</returns>
-        public MetricsData GetMetrics()
+        public MetricsData GetMetricsData()
         {
             return _metrics;
         }

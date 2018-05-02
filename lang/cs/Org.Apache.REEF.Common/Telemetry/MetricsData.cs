@@ -113,7 +113,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Update metrics 
         /// </summary>
         /// <param name="metrics"></param>
-        internal void Update(IMetrics metrics)
+        internal void Update(MetricsData metrics)
         {
             foreach (var metric in metrics.GetMetrics())
             {
@@ -124,7 +124,7 @@ namespace Org.Apache.REEF.Common.Telemetry
                 }
                 else
                 {
-                    _metricsMap.Add(me.Name, new MetricData(me));
+                    _metricsMap.Add(me.Name, metric);
                 }
             }
         }
@@ -180,7 +180,6 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <returns>Key value pairs for all the metrics on record and their value.</returns>
         internal IEnumerable<KeyValuePair<string, string>> GetMetricPairs()
         {
-            Logger.Log(Level.Info, "Getting metric data to sink; there are ");
             return _metricsMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
         }
 
@@ -199,7 +198,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 if (_metricsMap.Count > 0)
                 {
-                    return JsonConvert.SerializeObject(_metricsMap.Values.ToList(), settings);
+                    return JsonConvert.SerializeObject(_metricsMap.Values.Where(me => me.ChangesSinceLastSink > 0).ToList(), settings);
                 }
             }
             return null;

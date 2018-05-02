@@ -31,7 +31,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         public void TestEvaluatorMetricsCountersOnly()
         {
             var evalMetrics1 = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
-            var metrics1 = evalMetrics1.GetMetrics();
+            var metrics1 = evalMetrics1.GetMetricsData();
             metrics1.TryRegisterMetric(new Counter("counter1", "counter1 description"));
             metrics1.TryRegisterMetric(new Counter("counter2", "counter2 description"));
             ValidateMetric(metrics1, "counter1", 0);
@@ -47,7 +47,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             var counterStr = metrics1.Serialize();
 
             var evalMetrics2 = new EvaluatorMetrics(counterStr);
-            var metrics2 = evalMetrics2.GetMetrics();
+            var metrics2 = evalMetrics2.GetMetricsData();
             ValidateMetric(metrics2, "counter1", 4);
             ValidateMetric(metrics2, "counter2", 8);
         }
@@ -91,7 +91,7 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
         private static MetricsData CreateMetrics()
         {
             var m = TangFactory.GetTang().NewInjector().GetInstance<IEvaluatorMetrics>();
-            var c = m.GetMetrics();
+            var c = m.GetMetricsData();
             return c;
         }
     }

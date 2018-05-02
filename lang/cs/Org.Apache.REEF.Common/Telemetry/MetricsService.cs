@@ -72,7 +72,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         public void OnNext(IContextMessage contextMessage)
         {
             var msgReceived = ByteUtilities.ByteArraysToString(contextMessage.Message);
-            var metrics = new EvaluatorMetrics(msgReceived).GetMetrics();
+            var metrics = new EvaluatorMetrics(msgReceived).GetMetricsData();
 
             Logger.Log(Level.Info, "Received {0} metrics with context message: {1}.",
                 metrics.GetMetrics().Count(), msgReceived);

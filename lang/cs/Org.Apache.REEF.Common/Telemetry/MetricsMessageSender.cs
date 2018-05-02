@@ -59,9 +59,8 @@ namespace Org.Apache.REEF.Common.Telemetry
             get
             {
                 Logger.Log(Level.Info, "Getting context msg for eval metrics.");
-                var updatedMetrics = _evaluatorMetrics.GetMetrics().GetMetrics().Where(m => m.ChangesSinceLastSink > 0);
                 var s = _evaluatorMetrics.Serialize();
-                _evaluatorMetrics.GetMetrics().Reset();
+                _evaluatorMetrics.GetMetricsData().Reset();
                 if (s != null)
                 {
                     return Optional<ContextMessage>.Of(

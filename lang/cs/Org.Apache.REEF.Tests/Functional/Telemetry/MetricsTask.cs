@@ -38,7 +38,7 @@ namespace Org.Apache.REEF.Tests.Functional.Telemetry
         [Inject]
         private MetricsTask(IEvaluatorMetrics evaluatorMetrics)
         {
-            _metricSet = evaluatorMetrics.GetMetrics();
+            _metricSet = evaluatorMetrics.GetMetricsData();
             _metricSet.TryRegisterMetric(new Counter(TestCounter, TestCounter + " description"));
             _metricSet.TryRegisterMetric(new IntegerGauge(TestIntGauge, TestIntGauge + " description"));
         }

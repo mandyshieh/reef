@@ -23,7 +23,7 @@ using Org.Apache.REEF.Utilities.Logging;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// This class wraps a metric object and the increment value since last sink
+    /// This class wraps a metric object, the record and counts of updates since last sink.
     /// </summary>
     [JsonObject]
     public sealed class MetricData
@@ -55,6 +55,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             _metric = metric;
             ChangesSinceLastSink = 0;
             _records = new List<IMetric>();
+            _records.Add(_metric.Copy());
         }
 
         [JsonConstructor]
@@ -80,13 +81,12 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="metric">Metric data received.</param>
         internal void UpdateMetric(MetricData metric)
         {
-            if (!(metric.GetMetric() is ICounter))
+            if (!(metric.GetMetric() is ICounter) && metric.ChangesSinceLastSink > 0)
             {
                 foreach (var r in metric._records)
                 {
                     _records.Add(r);
                 }
-                _records.Add(_metric);
             }
             ChangesSinceLastSink += metric.ChangesSinceLastSink;
             _metric.Update(metric.GetMetric()); // update current metric value
@@ -100,7 +100,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
             if (!(me is ICounter))
             {
-                _records.Add(_metric);
+                _records.Add(me);
             }
             ChangesSinceLastSink++;
             _metric.Update(me); // update current metric value
@@ -109,11 +109,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         internal void UpdateMetric(string name, object val)
         {
             var tmp = _metric.Copy();
+            _metric.Update(val);
             if (!(_metric is ICounter))
             {
-                _records.Add(tmp);
+                _records.Add(_metric.Copy());
             }
-            _metric.Update(val);
             ChangesSinceLastSink++;
         }
 
@@ -129,11 +129,18 @@ namespace Org.Apache.REEF.Common.Telemetry
         internal IEnumerable<KeyValuePair<string, string>> GetKeyValuePair()
         {
             var values = new List<KeyValuePair<string, string>>();
-            foreach (var r in _records)
+
+            if (!(_metric is ICounter))
             {
-                values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
+                foreach (var r in _records)
+                {
+                    values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
+                }
             }
-            values.Add(new KeyValuePair<string, string>(_metric.Name, _metric.ValueUntyped.ToString()));
+            else
+            {
+                values.Add(new KeyValuePair<string, string>(_metric.Name, _metric.ValueUntyped.ToString()));
+            }
             return values;
         }
     }
