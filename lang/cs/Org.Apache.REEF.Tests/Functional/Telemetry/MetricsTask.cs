@@ -48,7 +48,7 @@ namespace Org.Apache.REEF.Tests.Functional.Telemetry
             for (int i = 0; i < 100; i++)
             {
                 _metricSet.Update(TestCounter, i);
-                _metricSet.Update(TestIntGauge, i * 2);
+                _metricSet.Update(TestIntGauge, i);
                 Thread.Sleep(100);
             }
             return null;

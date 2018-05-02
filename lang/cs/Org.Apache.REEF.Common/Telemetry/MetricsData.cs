@@ -178,7 +178,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Convert the metric data into ISet for sink
         /// </summary>
         /// <returns>Key value pairs for all the metrics on record and their value.</returns>
-        internal IEnumerable<KeyValuePair<string, string>> GetMetricData()
+        internal IEnumerable<KeyValuePair<string, string>> GetMetricPairs()
         {
             Logger.Log(Level.Info, "Getting metric data to sink; there are ");
             return _metricsMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);

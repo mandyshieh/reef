@@ -22,10 +22,6 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         void Increment(int number);
 
-        void Increment();
-
-        void Decrement();
-
         void Decrement(int number);
     }
 }

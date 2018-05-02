@@ -22,109 +22,54 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// The properties that need to be serialized will be revisited later. We should only serialize minimum data to reduce the network load
     /// For example, the name can be mapped to a unique number (byte) and description should not be serialized.
     /// </summary>
-    internal sealed class Counter : ICounter
+    internal sealed class Counter : MetricBase<int>, ICounter
     {
-        private string _name;
-        private string _description;
-        private int _typedValue;
-        private long _timestamp;
-
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
-
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
-
-        public object ValueUntyped
-        {
-            get
-            {
-                return _typedValue;
-            }
-            set
-            {
-                _typedValue = Convert.ToInt32(value);
-            }
-        }
-
-        public long Timestamp
-        {
-            get
-            {
-                return _timestamp;
-            }
-        }
-
-        public int Value
-        {
-            get
-            {
-                return _typedValue;
-            }
-            set
-            {
-                _typedValue = Convert.ToInt32(value);
-            }
-        }
-
         public Counter(string name, string description)
+            : base(name, description)
         {
-            _name = name;
-            _description = description;
             _timestamp = DateTime.Now.Ticks;
             _typedValue = default(int);
         }
 
         [JsonConstructor]
         internal Counter(string name, string description, long timeStamp, int value)
+            : base(name, description)
         {
-            _name = name;
-            _description = description;
             _timestamp = timeStamp;
             _typedValue = value;
+        }
+
+        public override void Update(IMetric me)
+        {
+            _typedValue = Convert.ToInt32(me.ValueUntyped);
+            _timestamp = DateTime.Now.Ticks;
+        }
+
+        public override void Update(object val)
+        {
+            _typedValue = Convert.ToInt32(val);
+            _timestamp = DateTime.Now.Ticks;
+        }
+
+        public override IMetric Copy()
+        {
+            return new Counter(Name, Description, _timestamp, _typedValue);
         }
 
         /// <summary>
         /// Increase the counter value and update the time stamp.
         /// </summary>
         /// <param name="number"></param>
-        public void Increment(int number)
+        public void Increment(int number = 1)
         {
             _typedValue += number;
             _timestamp = DateTime.Now.Ticks;
         }
 
-        public void Increment()
-        {
-            _typedValue += 1;
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public void Decrement()
-        {
-            _typedValue -= 1;
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public void Decrement(int number)
+        public void Decrement(int number = 1)
         {
             _typedValue -= number;
             _timestamp = DateTime.Now.Ticks;
-        }
-
-        public IMetric Copy()
-        {
-            return new Counter(_name, _description, _timestamp, _typedValue);
         }
     }
 }

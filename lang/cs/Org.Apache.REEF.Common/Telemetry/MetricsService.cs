@@ -81,7 +81,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
             if (_metricsData.TriggerSink(_metricSinkThreshold))
             {
-                Sink(_metricsData.GetMetricData());
+                Sink(_metricsData.GetMetricPairs());
                 _metricsData.Reset();
             }
         }
@@ -111,7 +111,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public void OnCompleted()
         {
-            Sink(_metricsData.GetMetricData());
+            Sink(_metricsData.GetMetricPairs());
             Logger.Log(Level.Info, "Completed");
         }
 

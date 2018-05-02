@@ -5,81 +5,34 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    class DoubleGauge : IMetric<double>
+    class DoubleGauge : MetricBase<double>
     {
-        private string _name;
-        private string _description;
-        private double _typedValue;
-        private long _timestamp;
-
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
-
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
-
-        public object ValueUntyped
-        {
-            get
-            {
-                return _typedValue;
-            }
-            set
-            {
-                _typedValue = Convert.ToDouble(value);
-            }
-        }
-
-        public long Timestamp
-        {
-            get
-            {
-                return _timestamp;
-            }
-        }
-
-        public double Value
-        {
-            get
-            {
-                return _typedValue;
-            }
-            set
-            {
-                _typedValue = Convert.ToDouble(value);
-            }
-        }
-
         public DoubleGauge(string name, string description)
+            : base(name, description)
         {
-            _name = name;
-            _description = description;
-            _timestamp = DateTime.Now.Ticks;
-            _typedValue = default(double);
         }
 
         [JsonConstructor]
         internal DoubleGauge(string name, string description, long timeStamp, double value)
+            : base(name, description, timeStamp, value)
         {
-            _name = name;
-            _description = description;
-            _timestamp = timeStamp;
-            _typedValue = value;
         }
 
-        public IMetric Copy()
+        public override void Update(IMetric me)
         {
-            return new DoubleGauge(_name, _description, _timestamp, _typedValue);
+            _typedValue = Convert.ToDouble(me.ValueUntyped);
+            _timestamp = DateTime.Now.Ticks;
+        }
+
+        public override void Update(object val)
+        {
+            _typedValue = Convert.ToDouble(val);
+            _timestamp = DateTime.Now.Ticks;
+        }
+
+        public override IMetric Copy()
+        {
+            return new DoubleGauge(Name, Description, _timestamp, _typedValue);
         }
     }
 }

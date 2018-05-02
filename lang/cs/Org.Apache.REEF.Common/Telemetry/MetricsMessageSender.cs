@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-using System;
+using System.Linq;
 using Org.Apache.REEF.Common.Context;
 using Org.Apache.REEF.Tang.Annotations;
 using Org.Apache.REEF.Utilities;
@@ -59,6 +59,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             get
             {
                 Logger.Log(Level.Info, "Getting context msg for eval metrics.");
+                var updatedMetrics = _evaluatorMetrics.GetMetrics().GetMetrics().Where(m => m.ChangesSinceLastSink > 0);
                 var s = _evaluatorMetrics.Serialize();
                 _evaluatorMetrics.GetMetrics().Reset();
                 if (s != null)

@@ -89,7 +89,7 @@ namespace Org.Apache.REEF.Common.Telemetry
                 _records.Add(_metric);
             }
             ChangesSinceLastSink += metric.ChangesSinceLastSink;
-            _metric = metric.GetMetric(); // update current metric value
+            _metric.Update(metric.GetMetric()); // update current metric value
         }
 
         internal void UpdateMetric(IMetric me)
@@ -103,7 +103,7 @@ namespace Org.Apache.REEF.Common.Telemetry
                 _records.Add(_metric);
             }
             ChangesSinceLastSink++;
-            _metric = me; // update current metric value
+            _metric.Update(me); // update current metric value
         }
 
         internal void UpdateMetric(string name, object val)
@@ -113,7 +113,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 _records.Add(tmp);
             }
-            _metric.ValueUntyped = val;
+            _metric.Update(val);
             ChangesSinceLastSink++;
         }
 
