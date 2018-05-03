@@ -115,16 +115,19 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="metrics"></param>
         internal void Update(MetricsData metrics)
         {
-            foreach (var metric in metrics.GetMetrics())
+            lock (_metricLock)
             {
-                var me = metric.GetMetric();
-                if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
+                foreach (var metric in metrics.GetMetrics())
                 {
-                    metricData.UpdateMetric(metric);
-                }
-                else
-                {
-                    _metricsMap.Add(me.Name, metric);
+                    var me = metric.GetMetric();
+                    if (_metricsMap.TryGetValue(me.Name, out MetricData metricData))
+                    {
+                        metricData.UpdateMetric(metric);
+                    }
+                    else
+                    {
+                        _metricsMap.Add(me.Name, metric);
+                    }
                 }
             }
         }

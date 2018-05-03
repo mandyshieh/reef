@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Org.Apache.REEF.Utilities.Logging;
 
@@ -84,6 +85,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="metric">Metric data received.</param>
         internal void UpdateMetric(MetricData metric)
         {
+            _metric.Update(metric.GetMetric());
             if (metric.GetMetric().IsImmutable && metric.ChangesSinceLastSink > 0)
             {
                 foreach (var r in metric._records)
@@ -92,7 +94,6 @@ namespace Org.Apache.REEF.Common.Telemetry
                 }
             }
             ChangesSinceLastSink += metric.ChangesSinceLastSink;
-            _metric.Update(metric.GetMetric()); // update current metric value
         }
 
         internal void UpdateMetric(IMetric me)
@@ -101,23 +102,14 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 throw new ApplicationException("Trying to update metric of type " + _metric.GetType() + " with type " + me.GetType());
             }
-            if (me.IsImmutable)
-            {
-                _records.Add(me);
-            }
-            ChangesSinceLastSink++;
-            _metric.Update(me); // update current metric value
+            _metric.Update(me);
+            UpdateRecords();
         }
 
         internal void UpdateMetric(string name, object val)
         {
-            var tmp = _metric.Copy();
             _metric.Update(val);
-            if (_metric.IsImmutable)
-            {
-                _records.Add(_metric.Copy());
-            }
-            ChangesSinceLastSink++;
+            UpdateRecords();
         }
 
         internal IMetric GetMetric()
@@ -135,16 +127,22 @@ namespace Org.Apache.REEF.Common.Telemetry
 
             if (_metric.IsImmutable)
             {
-                foreach (var r in _records)
-                {
-                    values.Add(new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString()));
-                }
+                values.AddRange(_records.Select(r => new KeyValuePair<string, string>(_metric.Name, r.ValueUntyped.ToString())));
             }
             else
             {
                 values.Add(new KeyValuePair<string, string>(_metric.Name, _metric.ValueUntyped.ToString()));
             }
             return values;
+        }
+
+        private void UpdateRecords()
+        {
+            if (_metric.IsImmutable)
+            {
+                _records.Add(_metric.Copy());
+            }
+            ChangesSinceLastSink++;
         }
     }
 }
