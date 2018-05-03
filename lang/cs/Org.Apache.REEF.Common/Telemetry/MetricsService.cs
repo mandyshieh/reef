@@ -89,7 +89,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// Call each Sink to sink the data in the metrics
         /// </summary>
-        private void Sink(IEnumerable<KeyValuePair<string, string>> metrics)
+        private void Sink(IEnumerable<KeyValuePair<string, IMetric>> metrics)
         {
             foreach (var s in _metricsSinks)
             {
@@ -128,11 +128,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="driverMetrics">driver metrics data.</param>
         public void OnNext(IDriverMetrics driverMetrics)
         {
-            Sink(new Dictionary<string, string>()
+            var ret = new List<KeyValuePair<string, IMetric>>
             {
-                { "SystemState", driverMetrics.SystemState },
-                { "TimeUpdated", driverMetrics.TimeUpdated.ToLongTimeString() }
-            });
+                new KeyValuePair<string, IMetric>(driverMetrics.SystemState.Name, driverMetrics.SystemState)
+            };
+            Sink(ret);
         }
     }
 }

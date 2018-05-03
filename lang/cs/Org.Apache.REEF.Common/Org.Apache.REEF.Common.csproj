@@ -269,6 +269,7 @@ under the License.
     <Compile Include="Telemetry\MetricSinks.cs" />
     <Compile Include="Telemetry\MetricsMessageSender.cs" />
     <Compile Include="Telemetry\MetricsService.cs" />
+    <Compile Include="Telemetry\DriverSystemState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Avro\README.md" />
