@@ -24,7 +24,9 @@ using Org.Apache.REEF.Utilities.Logging;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// This class wraps a metric object, the record and counts of updates since last sink.
+    /// MetricData class maintains the current value of a single metric and keeps count of the number
+    /// of times this metric has been updated. If the metric is immutable, it keeps a record of updates.
+    /// Once the data has been processed, the records and count will reset.
     /// </summary>
     [JsonObject]
     public sealed class MetricData
@@ -37,16 +39,17 @@ namespace Org.Apache.REEF.Common.Telemetry
         [JsonProperty]
         private IMetric _metric;
 
+        /// <summary>
+        /// List of all udpated values since last processed, including current.
+        /// </summary>
         [JsonProperty]
         private IList<IMetric> _records;
 
-        ///// <summary>
-        ///// Whether metric has been updated since last sink.
-        ///// </summary>
+        /// <summary>
+        /// Number of times metric has been updated since last processed.
+        /// </summary>
         [JsonProperty]
         internal int ChangesSinceLastSink;
-
-        private bool _keepUpdateRecord;
 
         /// <summary>
         /// Constructor for metricData
@@ -62,16 +65,15 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         [JsonConstructor]
-        internal MetricData(IMetric metric, IList<IMetric> records, int changes, bool record)
+        internal MetricData(IMetric metric, IList<IMetric> records, int changes)
         {
             _metric = metric;
             _records = records;
             ChangesSinceLastSink = changes;
-            _keepUpdateRecord = record;
         }
 
         /// <summary>
-        /// clear the increment since last sink
+        /// Reset records.
         /// </summary>
         internal void ResetChangeSinceLastSink()
         {
@@ -96,6 +98,10 @@ namespace Org.Apache.REEF.Common.Telemetry
             ChangesSinceLastSink += metric.ChangesSinceLastSink;
         }
 
+        /// <summary>
+        /// Updates metric value with metric object received.
+        /// </summary>
+        /// <param name="me">New metric.</param>
         internal void UpdateMetric(IMetric me)
         {
             if (me.GetType() != _metric.GetType())
@@ -106,12 +112,21 @@ namespace Org.Apache.REEF.Common.Telemetry
             UpdateRecords();
         }
 
+        /// <summary>
+        /// Updates metric value given its name.
+        /// </summary>
+        /// <param name="name">Name of the metric to update.</param>
+        /// <param name="val">New value.</param>
         internal void UpdateMetric(string name, object val)
         {
             _metric.Update(val);
             UpdateRecords();
         }
 
+        /// <summary>
+        /// Get the metric with its most recent value.
+        /// </summary>
+        /// <returns></returns>
         internal IMetric GetMetric()
         {
             return _metric;

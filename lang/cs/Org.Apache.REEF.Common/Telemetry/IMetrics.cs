@@ -24,13 +24,10 @@ namespace Org.Apache.REEF.Common.Telemetry
     public interface IMetrics
     {
         /// <summary>
-        /// Register a new metric with a specified name.
-        /// If name does not exist, the metric will be added and true will be returned
-        /// Otherwise the metric will be not added and false will be returned. 
+        /// Register a new metric.
         /// </summary>
-        /// <param name="name">Name of the metric to be registered.</param>
-        /// <param name="description">Description of the metric to be registered.</param>
-        /// <returns>Returns a boolean to indicate if the metric is added.</returns>
+        /// <param name="metric">The metric to be registered.</param>
+        /// <returns>Returns a boolean to indicate if the metric has been added.</returns>
         bool TryRegisterMetric(IMetric metric);
 
         /// <summary>

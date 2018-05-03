@@ -76,6 +76,13 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
+        /// <summary>
+        /// Checks if the metric to be registered has a unique name. If the metric name has already been 
+        /// registered, metric is not entered into the registration and method returns false. On successful
+        /// registration, method returns true.
+        /// </summary>
+        /// <param name="metric">Metric to register.</param>
+        /// <returns>Indicates if the metric was registered.</returns>
         public bool TryRegisterMetric(IMetric metric)
         {
             lock (_metricLock)
@@ -90,6 +97,12 @@ namespace Org.Apache.REEF.Common.Telemetry
             return true;
         }
 
+        /// <summary>
+        /// Gets a metric given a name.
+        /// </summary>
+        /// <param name="name">Name of the metric.</param>
+        /// <param name="me">The metric object returned.</param>
+        /// <returns>Boolean indicating if a metric object was succesfully retrieved.</returns>
         public bool TryGetValue(string name, out IMetric me)
         {
             lock (_metricLock)
@@ -104,15 +117,21 @@ namespace Org.Apache.REEF.Common.Telemetry
             return true;
         }
 
+        /// <summary>
+        /// Gets all the registered metrics.
+        /// </summary>
+        /// <returns>IEnumerable of MetricData.</returns>
         public IEnumerable<MetricData> GetMetrics()
         {
             return _metricsMap.Values;
         }
 
         /// <summary>
-        /// Update metrics 
+        /// Updates metrics given another <see cref="MetricsData"/> object.
+        /// For every metric in the new set, if it is registered then update the value,
+        /// if it is not then add it to the registration.
         /// </summary>
-        /// <param name="metrics"></param>
+        /// <param name="metrics">New metric values to be updated.</param>
         internal void Update(MetricsData metrics)
         {
             lock (_metricLock)
@@ -132,6 +151,11 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
+        /// <summary>
+        /// Updates metrics with a single metric object. If the metric has already been registered,
+        /// update the value; if not, add it to the registry.
+        /// </summary>
+        /// <param name="me">New metric object to be added or updated.</param>
         internal void Update(IMetric me)
         {
             lock (_metricLock)
@@ -147,6 +171,12 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
+        /// <summary>
+        /// Updates the metric to the specified value given the metric's name. If the metric name has been registered,
+        /// update the value; if not, the metric is not added and an exception is thrown.
+        /// </summary>
+        /// <param name="name">Name of the metric to update.</param>
+        /// <param name="val">New for the specified metric.</param>
         internal void Update(string name, object val)
         {
             lock (_metricLock)
