@@ -211,9 +211,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Convert the metric data into ISet for sink
         /// </summary>
         /// <returns>Key value pairs for all the metrics on record and their value.</returns>
-        internal IEnumerable<KeyValuePair<string, IMetric>> GetMetricPairs()
+        internal IEnumerable<IMetric> GetMetricsHistory()
         {
-            return _metricsMap.Select(metric => metric.Value.GetKeyValuePair()).SelectMany(m => m);
+            return _metricsMap.Select(metric => metric.Value.GetMetricRecords()).SelectMany(r => r);
         }
 
         /// <summary>

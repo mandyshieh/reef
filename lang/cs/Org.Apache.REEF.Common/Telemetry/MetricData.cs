@@ -145,17 +145,17 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// Get KeyValuePair for every record and current metric value.
         /// </summary>
         /// <returns>This metric's values.</returns>
-        internal IEnumerable<KeyValuePair<string, IMetric>> GetKeyValuePair()
+        internal IEnumerable<IMetric> GetMetricRecords()
         {
-            var values = new List<KeyValuePair<string, IMetric>>();
+            var values = new List<IMetric>();
 
             if (_metric.IsImmutable)
             {
-                values.AddRange(_records.Select(r => new KeyValuePair<string, IMetric>(_metric.Name, r)));
+                values.AddRange(_records.Select(r => r));
             }
             else
             {
-                values.Add(new KeyValuePair<string, IMetric>(_metric.Name, _metric));
+                values.Add(_metric);
             }
             return values;
         }

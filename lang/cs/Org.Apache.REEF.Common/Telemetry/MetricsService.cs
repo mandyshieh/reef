@@ -81,7 +81,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
             if (_metricsData.TriggerSink(_metricSinkThreshold))
             {
-                Sink(_metricsData.GetMetricPairs());
+                Sink(_metricsData.GetMetricsHistory());
                 _metricsData.Reset();
             }
         }
@@ -89,7 +89,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <summary>
         /// Call each Sink to sink the data in the metrics
         /// </summary>
-        private void Sink(IEnumerable<KeyValuePair<string, IMetric>> metrics)
+        private void Sink(IEnumerable<IMetric> metrics)
         {
             foreach (var s in _metricsSinks)
             {
@@ -111,7 +111,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public void OnCompleted()
         {
-            Sink(_metricsData.GetMetricPairs());
+            Sink(_metricsData.GetMetricsHistory());
             Logger.Log(Level.Info, "Completed");
         }
 
@@ -128,9 +128,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="driverMetrics">driver metrics data.</param>
         public void OnNext(IDriverMetrics driverMetrics)
         {
-            var ret = new List<KeyValuePair<string, IMetric>>
+            var ret = new List<IMetric>
             {
-                new KeyValuePair<string, IMetric>(driverMetrics.SystemState.Name, driverMetrics.SystemState)
+                driverMetrics.SystemState
             };
             Sink(ret);
         }
