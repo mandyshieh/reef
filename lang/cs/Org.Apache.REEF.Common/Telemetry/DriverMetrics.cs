@@ -26,14 +26,17 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// </summary>
     public sealed class DriverMetrics : IDriverMetrics
     {
-        public DriverMetrics(string systemState, DateTime timeUpdated)
+        private string _stateMetricName = "State";
+
+        public IMetric SystemState
         {
-            SystemState = systemState;
-            TimeUpdated = timeUpdated;
+            get;
         }
 
-        public string SystemState { get; private set; }
-
-        public DateTime TimeUpdated { get; private set; }
+        public DriverMetrics(string systemState, DateTime timeUpdated)
+        {
+            SystemState = new DriverSystemState(_stateMetricName, "Driver state.");
+            SystemState.Update(systemState);
+        }
     }
 }

@@ -25,14 +25,6 @@ namespace Org.Apache.REEF.Common.Telemetry
     [DefaultImplementation(typeof(DriverMetrics))]
     public interface IDriverMetrics
     {
-        /// <summary>
-        /// System state
-        /// </summary>
-        string SystemState { get; }
-
-        /// <summary>
-        /// DateTime that the system state is updated
-        /// </summary>
-        DateTime TimeUpdated { get; }
+        IMetric SystemState { get; }
     }
 }
