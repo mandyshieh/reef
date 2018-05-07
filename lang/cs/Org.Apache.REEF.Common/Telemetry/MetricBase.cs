@@ -69,10 +69,6 @@ namespace Org.Apache.REEF.Common.Telemetry
             _typedValue = value;
         }
 
-        public abstract IMetric Copy();
-
-        public abstract void Update(IMetric me);
-
-        public abstract void Update(object val);
+        public abstract IMetric CreateInstanceWithNewValue(object val);
     }
 }

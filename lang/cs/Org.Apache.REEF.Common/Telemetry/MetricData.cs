@@ -61,7 +61,7 @@ namespace Org.Apache.REEF.Common.Telemetry
             _metric = metric;
             ChangesSinceLastSink = 0;
             _records = new List<IMetric>();
-            _records.Add(_metric.Copy());
+            _records.Add(_metric);
         }
 
         [JsonConstructor]
@@ -87,7 +87,8 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="metric">Metric data received.</param>
         internal void UpdateMetric(MetricData metric)
         {
-            _metric.Update(metric.GetMetric());
+            ChangesSinceLastSink++;
+            _metric = metric.GetMetric();
             if (metric.GetMetric().IsImmutable && metric.ChangesSinceLastSink > 0)
             {
                 foreach (var r in metric._records)
@@ -108,8 +109,12 @@ namespace Org.Apache.REEF.Common.Telemetry
             {
                 throw new ApplicationException("Trying to update metric of type " + _metric.GetType() + " with type " + me.GetType());
             }
-            _metric.Update(me);
-            UpdateRecords();
+            ChangesSinceLastSink++;
+            _metric = me;
+            if (_metric.IsImmutable)
+            {
+                _records.Add(_metric);
+            }
         }
 
         /// <summary>
@@ -119,8 +124,12 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// <param name="val">New value.</param>
         internal void UpdateMetric(string name, object val)
         {
-            _metric.Update(val);
-            UpdateRecords();
+            ChangesSinceLastSink++;
+            _metric = _metric.CreateInstanceWithNewValue(val);
+            if (_metric.IsImmutable)
+            {
+                _records.Add(_metric);
+            }
         }
 
         /// <summary>
@@ -155,7 +164,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
             if (_metric.IsImmutable)
             {
-                _records.Add(_metric.Copy());
+                _records.Add(_metric);
             }
             ChangesSinceLastSink++;
         }

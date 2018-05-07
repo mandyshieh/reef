@@ -44,21 +44,9 @@ namespace Org.Apache.REEF.Common.Telemetry
             _typedValue = value;
         }
 
-        public override void Update(IMetric me)
+        public override IMetric CreateInstanceWithNewValue(object val)
         {
-            _typedValue = Convert.ToInt32(me.ValueUntyped);
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public override void Update(object val)
-        {
-            _typedValue = Convert.ToInt32(val);
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public override IMetric Copy()
-        {
-            return new Counter(Name, Description, _timestamp, _typedValue);
+            return new Counter(Name, Description, DateTime.Now.Ticks, (int)val);
         }
 
         /// <summary>

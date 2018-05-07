@@ -23,21 +23,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
         }
 
-        public override void Update(IMetric me)
+        public override IMetric CreateInstanceWithNewValue(object val)
         {
-            _typedValue = Convert.ToString(me.ValueUntyped);
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public override void Update(object val)
-        {
-            _typedValue = Convert.ToString(val);
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public override IMetric Copy()
-        {
-            return new DriverSystemState(Name, Description, _timestamp, _typedValue);
+            return new DriverSystemState(Name, Description, DateTime.Now.Ticks, (string)val);
         }
     }
 }

@@ -23,21 +23,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         {
         }
 
-        public override void Update(IMetric me)
+        public override IMetric CreateInstanceWithNewValue(object val)
         {
-            _typedValue = Convert.ToDouble(me.ValueUntyped);
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public override void Update(object val)
-        {
-            _typedValue = Convert.ToDouble(val);
-            _timestamp = DateTime.Now.Ticks;
-        }
-
-        public override IMetric Copy()
-        {
-            return new DoubleGauge(Name, Description, _timestamp, _typedValue);
+            return new DoubleGauge(Name, Description, DateTime.Now.Ticks, (double)val);
         }
     }
 }
