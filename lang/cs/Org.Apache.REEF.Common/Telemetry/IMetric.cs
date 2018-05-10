@@ -47,24 +47,11 @@ namespace Org.Apache.REEF.Common.Telemetry
         /// </summary>
         bool IsImmutable { get; }
 
-        /////// <summary>
-        /////// Method to update the metric with another metric object.
-        /////// </summary>
-        /////// <param name="me">Holds the value to which this metric's value should be updated.</param>
-        ////void Update(IMetric me);
-
-        /////// <summary>
-        /////// Method to update the metric value.
-        /////// </summary>
-        /////// <param name="val">New value to which this metric's value should be updated.</param>
-        ////void Update(object val);
-
-        /////// <summary>
-        /////// Method to make another identical copy of this IMetric.
-        /////// </summary>
-        /////// <returns>An identical IMetric object.</returns>
-        ////IMetric Copy();
-
+        /// <summary>
+        /// Create a new instance of the metric object that contains a new value.
+        /// </summary>
+        /// <param name="val">Value of the new metric object.</param>
+        /// <returns></returns>
         IMetric CreateInstanceWithNewValue(object val);
     }
 
