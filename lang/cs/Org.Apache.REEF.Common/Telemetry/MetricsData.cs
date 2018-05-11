@@ -45,7 +45,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         private IDictionary<string, MetricData> _metricsMap = new ConcurrentDictionary<string, MetricData>();
 
         /// <summary>
-        /// The lock for metrics
+        /// The lock for metrics.
         /// </summary>
         private readonly object _metricLock = new object();
 
@@ -208,9 +208,9 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// Convert the metric data into ISet for sink
+        /// Convert the metric data to a collection of IMetric for sinking.
         /// </summary>
-        /// <returns>Key value pairs for all the metrics on record and their value.</returns>
+        /// <returns>A collection of metric records.</returns>
         internal IEnumerable<IMetric> GetMetricsHistory()
         {
             return _metricsMap.Select(metric => metric.Value.GetMetricRecords()).SelectMany(r => r);
