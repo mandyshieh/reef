@@ -31,7 +31,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         bool TryRegisterMetric(IMetric metric);
 
         /// <summary>
-        /// Get metric value for a given metric name
+        /// Get metric value given the metric name.
         /// </summary>
         /// <param name="name">Name of the metric</param>
         /// <param name="metric">The metric object returned</param>
@@ -39,7 +39,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         bool TryGetValue(string name, out IMetric metric);
 
         /// <summary>
-        /// Returns all the metrics
+        /// Returns all the metrics.
         /// </summary>
         /// <returns></returns>
         IEnumerable<MetricData> GetMetrics();

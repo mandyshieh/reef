@@ -18,7 +18,7 @@
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// Metric interface. A generic interface used to store metrics in <see cref="IMetrics"/>
+    /// Metric interface. A generic interface for individual metrics.
     /// </summary>
     public interface IMetric
     {

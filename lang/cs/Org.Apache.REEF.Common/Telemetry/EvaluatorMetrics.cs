@@ -20,6 +20,9 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
+    /// <summary>
+    /// An evaluator metrics implementation that maintains a collection of metrics.
+    /// </summary>
     internal sealed class EvaluatorMetrics : IEvaluatorMetrics
     {
         private readonly MetricsData _metrics;

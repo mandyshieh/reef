@@ -1,4 +1,8 @@
-﻿// to you under the Apache License, Version 2.0 (the
+﻿// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
 // "License"); you may not use this file except in compliance
 // with the License.  You may obtain a copy of the License at
 //
@@ -13,14 +17,11 @@
 
 using System;
 using Newtonsoft.Json;
-using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// Counter implementation
-    /// The properties that need to be serialized will be revisited later. We should only serialize minimum data to reduce the network load
-    /// For example, the name can be mapped to a unique number (byte) and description should not be serialized.
+    /// Counter implementation.
     /// </summary>
     internal sealed class Counter : MetricBase<int>, ICounter
     {

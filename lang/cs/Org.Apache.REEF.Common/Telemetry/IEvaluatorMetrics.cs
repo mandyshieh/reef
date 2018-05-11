@@ -24,13 +24,13 @@ namespace Org.Apache.REEF.Common.Telemetry
     public interface IEvaluatorMetrics
     {
         /// <summary>
-        /// Returns metrics counters
+        /// Returns the evaluator metrics.
         /// </summary>
         /// <returns>Returns ICounters.</returns>
         MetricsData GetMetricsData();
 
         /// <summary>
-        /// Serialize the metrics data into a string
+        /// Serializes the metrics data into a string.
         /// </summary>
         /// <returns>Returns serialized string of metrics</returns>
         string Serialize();

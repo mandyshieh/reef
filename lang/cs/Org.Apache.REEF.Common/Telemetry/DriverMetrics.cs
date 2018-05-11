@@ -20,9 +20,7 @@ using System;
 namespace Org.Apache.REEF.Common.Telemetry
 {
     /// <summary>
-    /// A simple driver metrics.
-    /// It contains system state for now.
-    /// It can be extended later to include more driver metrics data.
+    /// A simple driver metrics implementation that contains the system state.
     /// </summary>
     public sealed class DriverMetrics : IDriverMetrics
     {

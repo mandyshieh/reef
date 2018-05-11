@@ -21,7 +21,6 @@ using Org.Apache.REEF.Utilities.Attributes;
 
 namespace Org.Apache.REEF.Common.Telemetry
 {
-    [Unstable("0.16", "This is to build a simple metrics with system state only. More metrics will be added in future.")]
     [DefaultImplementation(typeof(DriverMetrics))]
     public interface IDriverMetrics
     {

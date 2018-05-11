@@ -159,14 +159,5 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
             return values;
         }
-
-        private void UpdateRecords()
-        {
-            if (_metric.IsImmutable)
-            {
-                _records.Add(_metric);
-            }
-            ChangesSinceLastSink++;
-        }
     }
 }
