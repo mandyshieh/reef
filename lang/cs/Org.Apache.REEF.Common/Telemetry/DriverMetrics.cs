@@ -26,7 +26,7 @@ namespace Org.Apache.REEF.Common.Telemetry
     /// </summary>
     public sealed class DriverMetrics : IDriverMetrics
     {
-        private string _stateMetricName = "State";
+        private string _stateMetricName = "DriverState";
 
         public IMetric SystemState
         {
@@ -35,8 +35,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         public DriverMetrics(string systemState, DateTime timeUpdated)
         {
-            SystemState = new DriverSystemState(_stateMetricName, "Driver state.");
-            SystemState = SystemState.CreateInstanceWithNewValue(systemState);
+            SystemState = new DriverSystemState(_stateMetricName, "driver state.", timeUpdated.Ticks, systemState);
         }
     }
 }

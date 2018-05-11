@@ -82,6 +82,14 @@ namespace Org.Apache.REEF.Common.Tests.Telemetry
             Assert.False(metrics.TryRegisterMetric(new Counter("metric1", "duplicate name")));
         }
 
+        [Fact]
+        public void TestUpdateMetricWithDifferentType()
+        {
+            var metrics = CreateMetrics();
+            metrics.TryRegisterMetric(new IntegerGauge("int1", "metric of type int", DateTime.Now.Ticks, 0));
+            Assert.Throws<ApplicationException>(() => metrics.Update(new DoubleGauge("int1", "new description", DateTime.Now.Ticks, 3)));
+        }
+
         private static void ValidateMetric(IMetrics metricSet, string name, object expectedValue)
         {
             metricSet.TryGetValue(name, out IMetric metric);

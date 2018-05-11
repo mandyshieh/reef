@@ -35,7 +35,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         private static readonly Logger Logger = Logger.GetLogger(typeof(MetricsService));
 
         /// <summary>
-        /// Contains metrics received in the Metrics service
+        /// Metrics received by the Metrics service
         /// </summary>
         private readonly MetricsData _metricsData;
 
@@ -45,9 +45,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         private readonly ISet<IMetricsSink> _metricsSinks;
 
         /// <summary>
-        /// The threshold that triggers the sinks. 
-        /// Currently only one threshold is defined for all the metrics.
-        /// Later, it can be extended to define a threshold per metric.
+        /// The threshold that triggers the sinks.
         /// </summary>
         private readonly int _metricSinkThreshold;
 
@@ -66,7 +64,7 @@ namespace Org.Apache.REEF.Common.Telemetry
         }
 
         /// <summary>
-        /// It is called whenever context message is received
+        /// Called whenever context message is received
         /// </summary>
         /// <param name="contextMessage">Serialized EvaluatorMetrics</param>
         public void OnNext(IContextMessage contextMessage)
@@ -109,6 +107,9 @@ namespace Org.Apache.REEF.Common.Telemetry
             }
         }
 
+        /// <summary>
+        /// Called when task is completed to sink cached metrics.
+        /// </summary>
         public void OnCompleted()
         {
             Sink(_metricsData.GetMetricsHistory());
@@ -122,8 +123,7 @@ namespace Org.Apache.REEF.Common.Telemetry
 
         /// <summary>
         /// Observer of IDriverMetrics.
-        /// When Driver metrics data is changed, this method will be called.
-        /// It calls Sink to store/log the metrics data.
+        /// Called when Driver metrics data is changed.
         /// </summary>
         /// <param name="driverMetrics">driver metrics data.</param>
         public void OnNext(IDriverMetrics driverMetrics)
